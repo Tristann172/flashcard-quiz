@@ -228,7 +228,7 @@ wheels = [
 [[package]]
 name = "flashcard-quiz"
 version = "0.1.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "pydantic" },
     { name = "streamlit" },
