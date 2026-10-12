@@ -6,6 +6,8 @@ from copy import deepcopy
 
 import streamlit as st
 
+from quiz_ui import render_quiz as render_quiz_view
+
 
 TAB1_STATE_KEY = "tab1_card_management"
 TAB1_DIFFICULTIES = {"Easy": "Dễ", "Medium": "Vừa", "Hard": "Khó"}
@@ -297,8 +299,7 @@ def render_tab1() -> None:
 
 
 def render_quiz() -> None:
-    st.subheader("Quiz · Ôn tập Flashcard")
-    st.info("Tính năng hàng đợi ôn tập & làm bài quiz đang được phát triển..")
+    render_quiz_view(tab1_cards(tab1_state()))
 
 
 def render_minigame() -> None:
