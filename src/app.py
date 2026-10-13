@@ -11,16 +11,28 @@ from quiz_ui import render_quiz as render_quiz_view
 
 TAB1_STATE_KEY = "tab1_card_management"
 TAB1_DIFFICULTIES = {"Easy": "Dễ", "Medium": "Vừa", "Hard": "Khó"}
+TAB1_OPTION_LABELS = ("A", "B", "C", "D")
 TAB1_SAMPLE_CARDS = [
     {"id": "c1", "question": "Tính bao đóng trong OOP là gì?",
      "answer": "Gom dữ liệu và phương thức vào một lớp, kiểm soát truy cập từ bên ngoài.",
-     "category": "OOP", "difficulty": "Easy", "hint": "Encapsulation", "image": None},
+     "category": "OOP", "difficulty": "Easy",
+     "quiz_question": "Tính bao đóng trong OOP mang lại lợi ích nào?",
+     "options": {"A": "Che giấu chi tiết cài đặt", "B": "Loại bỏ mọi thuộc tính",
+                 "C": "Kiểm soát truy cập dữ liệu", "D": "Không cần phương thức"},
+     "correct_answers": ["A", "C"],
+     "explanation": "Bao đóng giúp che giấu chi tiết và kiểm soát truy cập."},
     {"id": "c2", "question": "Cấu trúc nào hoạt động theo FIFO?",
      "answer": "Queue (hàng đợi).", "category": "DSA", "difficulty": "Easy",
-     "hint": "First In, First Out", "image": None},
+     "quiz_question": "Cấu trúc nào xử lý phần tử theo thứ tự vào trước ra trước?",
+     "options": {"A": "Stack", "B": "Queue", "C": "Tree", "D": "Graph"},
+     "correct_answers": ["B"],
+     "explanation": "Queue hoạt động theo nguyên tắc FIFO."},
     {"id": "c3", "question": "append() của collections.deque có độ phức tạp bao nhiêu?",
      "answer": "O(1).", "category": "Python", "difficulty": "Medium",
-     "hint": "Thao tác ở cuối deque", "image": None},
+     "quiz_question": "Độ phức tạp trung bình của deque.append() là gì?",
+     "options": {"A": "O(n)", "B": "O(1)", "C": "O(log n)", "D": "O(n²)"},
+     "correct_answers": ["B"],
+     "explanation": "Thêm phần tử ở cuối deque có độ phức tạp O(1)."},
 ]
 
 
@@ -34,6 +46,16 @@ def tab1_state() -> dict:
         }
     state = st.session_state[TAB1_STATE_KEY]
     state.setdefault("show_form", False)
+    # Preserve edits in a running browser session while upgrading old demo cards.
+    for card in state["cards"]:
+        sample = next((item for item in TAB1_SAMPLE_CARDS if item["id"] == card["id"]), None)
+        for field in ("quiz_question", "options", "correct_answers", "explanation"):
+            if field not in card:
+                card[field] = deepcopy(sample[field]) if sample else (
+                    {} if field == "options" else [] if field == "correct_answers" else ""
+                )
+        card.pop("hint", None)
+        card.pop("image", None)
     return state
 
 
@@ -60,16 +82,27 @@ def tab1_commit(state: dict, cards: list[dict]) -> None:
 def tab1_save_card(state: dict, values: dict, card_id: str | None = None) -> dict:
     """Demo data operation. Replace here with Manager calls at integration time."""
     cleaned = {}
-    for field in ("question", "answer", "category"):
+    for field in ("question", "answer", "category", "quiz_question", "explanation"):
         value = values.get(field)
         if not isinstance(value, str) or not value.strip():
-            raise ValueError("Hãy nhập câu hỏi, đáp án và chủ đề.")
+            raise ValueError("Hãy điền đủ nội dung Flashcard và Minigame.")
         cleaned[field] = value.strip()
     if values.get("difficulty") not in TAB1_DIFFICULTIES:
         raise ValueError("Độ khó không hợp lệ.")
     cleaned["difficulty"] = values["difficulty"]
-    cleaned["hint"] = (values.get("hint") or "").strip()
-    cleaned["image"] = values.get("image")
+    options = values.get("options")
+    if not isinstance(options, dict) or set(options) != set(TAB1_OPTION_LABELS):
+        raise ValueError("Minigame cần đủ bốn phương án A, B, C và D.")
+    if any(not isinstance(options[label], str) or not options[label].strip()
+           for label in TAB1_OPTION_LABELS):
+        raise ValueError("Hãy nhập nội dung cho cả bốn phương án A–D.")
+    cleaned["options"] = {label: options[label].strip() for label in TAB1_OPTION_LABELS}
+    selected = values.get("correct_answers")
+    if (not isinstance(selected, (list, tuple, set)) or not selected
+            or any(not isinstance(label, str) or label not in TAB1_OPTION_LABELS
+                   for label in selected)):
+        raise ValueError("Hãy chọn ít nhất một đáp án đúng trong A–D.")
+    cleaned["correct_answers"] = [label for label in TAB1_OPTION_LABELS if label in selected]
     cards = tab1_cards(state)
     if card_id is None:
         card = {"id": tab1_next_id(state), **cleaned}
@@ -129,6 +162,7 @@ def tab1_styles() -> None:
       }
       .st-key-tab1_editor [data-testid="stForm"] { border: 0; padding: 0; }
       .st-key-tab1_editor textarea,
+      .st-key-tab1_editor input,
       .st-key-tab1_library input,
       .st-key-tab1_editor [data-baseweb="select"] > div,
       .st-key-tab1_library [data-baseweb="select"] > div {
@@ -136,6 +170,7 @@ def tab1_styles() -> None:
         border-color: #d6dee6 !important; border-radius: 8px;
       }
       .st-key-tab1_editor textarea::placeholder,
+      .st-key-tab1_editor input::placeholder,
       .st-key-tab1_library input::placeholder { color: #64748b !important; }
       .st-key-tab1_editor label,
       .st-key-tab1_library label { color: #111827 !important; }
@@ -157,59 +192,94 @@ def tab1_styles() -> None:
 
 def tab1_render_form(state: dict, cards: list[dict]) -> None:
     editing = next((card for card in cards if card["id"] == state["editing_id"]), None)
-    initial = editing or {"question": "", "answer": "", "hint": "", "category": "OOP",
-                          "difficulty": "Easy", "image": None}
+    initial = editing or {
+        "question": "", "answer": "", "category": "OOP", "difficulty": "Easy",
+        "quiz_question": "", "options": {label: "" for label in TAB1_OPTION_LABELS},
+        "correct_answers": [], "explanation": "",
+    }
     categories = sorted({"OOP", "DSA", "Python"} | {card["category"] for card in cards})
     version = state["form_version"]
     with st.container(key="tab1_editor"):
-        st.markdown("### ✏️ Chỉnh sửa thẻ" if editing else "### ✏️ Tạo thẻ mới")
+        st.markdown("### ✏️ Chỉnh sửa thẻ" if editing else "### ＋ Thêm thẻ mới")
         if editing:
-            st.caption(f"Đang sửa thẻ {editing['id']}")
+            st.caption(f"Đang sửa thẻ {editing['id']} · Một thẻ gồm cả Flashcard và Minigame")
         with st.form(f"tab1_form_{version}"):
-            question = st.text_area("Câu hỏi (mặt trước) *", value=initial["question"],
-                                    placeholder="Nhập câu hỏi...", height=90,
-                                    key=f"tab1_question_{version}")
-            answer = st.text_area("Đáp án (mặt sau) *", value=initial["answer"],
-                                  placeholder="Nhập câu trả lời...", height=90,
-                                  key=f"tab1_answer_{version}")
-            hint = st.text_area("Gợi ý (không bắt buộc)", value=initial.get("hint", ""),
-                                placeholder="Thêm gợi ý nếu cần...", height=72,
-                                key=f"tab1_hint_{version}")
-            category_col, difficulty_col = st.columns(2)
-            with category_col:
-                category = st.selectbox("Chủ đề *", categories,
-                                        index=categories.index(initial["category"]),
-                                        accept_new_options=True,
-                                        key=f"tab1_category_{version}")
-            with difficulty_col:
-                difficulty = st.selectbox("Độ khó *", list(TAB1_DIFFICULTIES),
-                                          index=list(TAB1_DIFFICULTIES).index(initial["difficulty"]),
-                                          format_func=TAB1_DIFFICULTIES.get,
-                                          key=f"tab1_difficulty_{version}")
-            add_image = st.checkbox("Thêm ảnh (không bắt buộc)",
-                                    value=initial.get("image") is not None,
-                                    key=f"tab1_add_image_{version}")
-            upload = None
-            if add_image:
-                upload = st.file_uploader("Chọn ảnh PNG, JPG hoặc WEBP (tối đa 2 MB)",
-                                          type=["png", "jpg", "jpeg", "webp"],
-                                          max_upload_size=2, key=f"tab1_image_{version}")
-                if initial.get("image") and upload is None:
-                    st.caption("Ảnh hiện tại được giữ nếu không chọn ảnh mới.")
+            flashcard_col, minigame_col = st.columns(2, gap="large")
+            with flashcard_col:
+                st.markdown("#### Phần Flashcard")
+                question = st.text_area(
+                    "Câu hỏi mặt trước *", value=initial["question"],
+                    placeholder="Nhập câu hỏi Flashcard...", height=90,
+                    key=f"tab1_question_{version}",
+                )
+                answer = st.text_area(
+                    "Đáp án mặt sau *", value=initial["answer"],
+                    placeholder="Nhập đáp án Flashcard...", height=90,
+                    key=f"tab1_answer_{version}",
+                )
+                category_col, difficulty_col = st.columns(2)
+                with category_col:
+                    category = st.selectbox(
+                        "Chủ đề *", categories,
+                        index=categories.index(initial["category"]),
+                        accept_new_options=True,
+                        key=f"tab1_category_{version}",
+                    )
+                with difficulty_col:
+                    difficulty = st.selectbox(
+                        "Độ khó *", list(TAB1_DIFFICULTIES),
+                        index=list(TAB1_DIFFICULTIES).index(initial["difficulty"]),
+                        format_func=TAB1_DIFFICULTIES.get,
+                        key=f"tab1_difficulty_{version}",
+                    )
+            with minigame_col:
+                st.markdown("#### Phần Minigame")
+                quiz_question = st.text_area(
+                    "Câu hỏi vận dụng *", value=initial.get("quiz_question", ""),
+                    placeholder="Nhập câu hỏi trắc nghiệm...", height=90,
+                    key=f"tab1_quiz_question_{version}",
+                )
+                option_values = {}
+                for first, second in (("A", "B"), ("C", "D")):
+                    option_cols = st.columns(2)
+                    for column, label in zip(option_cols, (first, second)):
+                        with column:
+                            option_values[label] = st.text_input(
+                                f"Đáp án {label} *",
+                                value=initial.get("options", {}).get(label, ""),
+                                key=f"tab1_option_{label}_{version}",
+                            )
+                st.write("Chọn đáp án đúng *")
+                answer_cols = st.columns(4)
+                selected_answers = []
+                for column, label in zip(answer_cols, TAB1_OPTION_LABELS):
+                    with column:
+                        if st.checkbox(
+                            label, value=label in initial.get("correct_answers", []),
+                            key=f"tab1_correct_{label}_{version}",
+                        ):
+                            selected_answers.append(label)
+                explanation = st.text_area(
+                    "Lời giải Minigame *", value=initial.get("explanation", ""),
+                    placeholder="Giải thích vì sao đáp án đúng...", height=90,
+                    key=f"tab1_explanation_{version}",
+                )
+            st.caption("Một lần lưu cập nhật cả Flashcard và Minigame của cùng một thẻ.")
             save_col, reset_col = st.columns(2)
-            save = save_col.form_submit_button("Cập nhật thẻ" if editing else "Thêm thẻ",
+            save = save_col.form_submit_button("Lưu thay đổi" if editing else "Lưu thẻ mới",
                                                type="primary", width="stretch")
-            reset = reset_col.form_submit_button("Hủy chỉnh sửa" if editing else "Nhập lại",
+            reset = reset_col.form_submit_button("Hủy chỉnh sửa" if editing else "Hủy thêm thẻ",
                                                  width="stretch")
         if reset:
             tab1_reset_form(state)
             st.rerun()
         if save:
-            image = (upload.getvalue() if upload is not None else initial.get("image")) if add_image else None
             try:
                 card = tab1_save_card(state, {
-                    "question": question, "answer": answer, "hint": hint,
-                    "category": category, "difficulty": difficulty, "image": image,
+                    "question": question, "answer": answer,
+                    "category": category, "difficulty": difficulty,
+                    "quiz_question": quiz_question, "options": option_values,
+                    "correct_answers": selected_answers, "explanation": explanation,
                 }, card_id=editing["id"] if editing else None)
             except ValueError as error:
                 st.error(str(error))
@@ -245,12 +315,22 @@ def tab1_render_library(state: dict, cards: list[dict]) -> None:
                         st.markdown(f"**{card['question']}**")
                         st.caption(f"{card['id']} · {card['category']} · "
                                    f"{TAB1_DIFFICULTIES[card['difficulty']]}")
-                        with st.expander("Xem đáp án"):
-                            st.write(card["answer"])
-                            if card.get("hint"):
-                                st.caption(f"Gợi ý: {card['hint']}")
-                            if card.get("image"):
-                                st.image(card["image"])
+                        with st.expander("Xem nội dung thẻ"):
+                            flashcard_col, minigame_col = st.columns(2)
+                            with flashcard_col:
+                                st.markdown("**Flashcard · Đáp án**")
+                                st.write(card["answer"])
+                            with minigame_col:
+                                st.markdown("**Minigame**")
+                                st.write(card.get("quiz_question") or "Chưa có câu hỏi Minigame")
+                                for label in TAB1_OPTION_LABELS:
+                                    option = card.get("options", {}).get(label)
+                                    if option:
+                                        st.write(f"{label}. {option}")
+                                if card.get("correct_answers"):
+                                    st.caption("Đáp án đúng: " + ", ".join(card["correct_answers"]))
+                                if card.get("explanation"):
+                                    st.caption("Lời giải: " + card["explanation"])
                         edit_col, delete_col = st.columns(2)
                         if edit_col.button("✏️ Sửa", key=f"tab1_edit_{card['id']}", width="stretch"):
                             state["editing_id"] = card["id"]
