@@ -1,5 +1,6 @@
-"""Quiz views sharing Tab 1's palette and session-only card source."""
+"""Flashcard review views backed by the shared card repository."""
 
+import base64
 import streamlit as st
 
 from core.review import ReviewSession
@@ -30,7 +31,7 @@ def render_lobby(cards: list[dict]) -> None:
         count = sum(category is None or card["category"] == category for card in cards)
         st.caption(f"{count} thẻ sẵn sàng · Không giới hạn thời gian")
         if not count:
-            st.info("Chưa có thẻ để ôn tập. Hãy thêm câu hỏi ở tab Manager.")
+            st.info("Chưa có thẻ để ôn tập. Hãy thêm câu hỏi ở tab Quản lý thẻ.")
         if st.button("🚀 Bắt đầu ôn tập", key="quiz_start", type="primary",
                      disabled=count == 0, width="stretch"):
             try:
@@ -39,7 +40,7 @@ def render_lobby(cards: list[dict]) -> None:
                 st.error(str(error))
             else:
                 st.rerun()
-    st.caption("Dữ liệu lấy từ bộ thẻ ở tab Manager trong phiên hiện tại. "
+    st.caption("Dữ liệu lấy từ phần Flashcard trong data/cards.json. "
                "Thay đổi bộ thẻ sẽ được áp dụng ở lượt ôn tập tiếp theo.")
 
 
@@ -62,7 +63,7 @@ def render_active(session: ReviewSession) -> None:
         st.markdown("#### ❓ Câu hỏi")
         st.write(card["question"])
         if card.get("image"):
-            st.image(card["image"])
+            st.image(base64.b64decode(card["image"]["data"]))
         if card.get("hint"):
             with st.expander("💡 Xem gợi ý"):
                 st.write(card["hint"])
@@ -100,12 +101,9 @@ def render_result(session: ReviewSession) -> None:
         st.caption("Xuất sắc ≥90% · Tốt ≥75% · Khá ≥50% · Cần cải thiện <50%")
         st.caption("Tỷ lệ tính trên tất cả lượt tự đánh giá, bao gồm các lượt học lại.")
         with st.expander("Xem lịch sử ôn tập"):
-            st.dataframe([
-                {"Lượt": index + 1,
-                 "Câu hỏi": session.cards[item["card_id"]]["question"],
-                 "Kết quả": "Đã nhớ" if item["is_correct"] else "Chưa nhớ"}
-                for index, item in enumerate(stats.history)
-            ], hide_index=True, width="stretch")
+            for index, item in enumerate(stats.history, 1):
+                st.write(f"{index}. {session.cards[item['card_id']]['question']} — "
+                         f"{'Đã nhớ' if item['is_correct'] else 'Chưa nhớ'}")
         if st.button("🔄 Ôn tập phiên mới", key="quiz_new", type="primary", width="stretch"):
             reset_review()
 
