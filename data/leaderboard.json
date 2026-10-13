@@ -1,0 +1,20 @@
+[
+    {
+        "player_name": "Minh Trí",
+        "total_score": 1500,
+        "completion_time": "03:45",
+        "rank": 1
+    },
+    {
+        "player_name": "Tấn Phước",
+        "total_score": 1250,
+        "completion_time": "04:12",
+        "rank": 2
+    },
+    {
+        "player_name": "Phước Hưng",
+        "total_score": 980,
+        "completion_time": "05:00",
+        "rank": 3
+    }
+]
