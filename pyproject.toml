@@ -9,9 +9,18 @@ authors = [
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.14.0",
+    "pytest>=9.1.1",
     "streamlit>=1.65.0",
 ]
 
 
 [tool.uv]
 package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
