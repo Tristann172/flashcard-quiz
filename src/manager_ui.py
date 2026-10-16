@@ -34,7 +34,65 @@ def backend():
         from models.card import Card
     except ImportError:
         return None
-    return load_cards, save_cards, StaleCardsError, Card
+
+    # --- ADAPTER: Chuyển đổi dữ liệu chuẩn của nhóm cho Hưng xài ---
+    def adapted_load():
+        cards, rev = load_cards()
+        adapted = []
+        for c in cards:
+            adapted.append({
+                "id": c["id"],
+                "category": c.get("category", "OOP"),
+                "difficulty": c.get("difficulty", "Easy"),
+                "flashcard": {
+                    "question": c.get("question", ""),
+                    "answer": c.get("answer", ""),
+                    "hint": c.get("hint", ""),
+                    "image": c.get("image")
+                },
+                "minigame": {
+                    "question": c.get("quiz_question", ""),
+                    "options": {opt["id"]: opt["text"] for opt in c.get("options", [])},
+                    "correct_ids": c.get("correct_option_ids", []),
+                    "explanation": c.get("explanation", "Giải thích mặc định")
+                } if c.get("quiz_question") else None
+            })
+        return adapted, rev
+
+    def adapted_save(adapted_cards, rev):
+        flat_cards = []
+        for c in adapted_cards:
+            flat_c = {
+                "id": c["id"],
+                "category": c["category"],
+                "difficulty": c["difficulty"],
+                "question": c["flashcard"]["question"],
+                "answer": c["flashcard"]["answer"],
+                "hint": c["flashcard"].get("hint", ""),
+                "image": c["flashcard"].get("image"),
+            }
+            if c.get("minigame"):
+                flat_c["quiz_question"] = c["minigame"]["question"]
+                flat_c["options"] = [{"id": k, "text": v} for k, v in c["minigame"]["options"].items()]
+                flat_c["correct_option_ids"] = c["minigame"]["correct_ids"]
+                flat_c["explanation"] = c["minigame"].get("explanation", "")
+            else:
+                flat_c["quiz_question"] = ""
+                flat_c["options"] = []
+                flat_c["correct_option_ids"] = []
+            flat_cards.append(flat_c)
+        return save_cards(flat_cards, rev)
+
+    # Lớp Card giả để vượt qua hàm from_dict của Hưng ở line 102
+    class AdapterCard:
+        @classmethod
+        def from_dict(cls, data):
+            cls.data = data
+            return cls
+        def to_dict(self):
+            return self.data
+
+    return adapted_load, adapted_save, StaleCardsError, AdapterCard
 
 
 def operation_errors() -> tuple[type[Exception], ...]:

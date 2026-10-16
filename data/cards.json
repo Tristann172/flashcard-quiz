@@ -148,5 +148,15 @@
             {"id": "D", "text": "git merge feat/new"}
         ],
         "correct_option_ids": ["B", "C"]
+    },
+    {
+        "id": "c11",
+        "question": "Streamlit là gì và điểm mạnh lớn nhất của nó là gì?",
+        "answer": "Streamlit là một thư viện Python mã nguồn mở, cho phép lập trình viên xây dựng các ứng dụng web tương tác một cách nhanh chóng chỉ bằng mã Python thuần túy mà không cần biết HTML, CSS hay JavaScript.",
+        "category": "Streamlit",
+        "difficulty": "Easy",
+        "quiz_question": "",
+        "options": [],
+        "correct_option_ids": []
     }
 ]

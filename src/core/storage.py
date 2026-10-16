@@ -3,6 +3,10 @@ import os
 from pathlib import Path
 from typing import Any
 
+class StaleCardsError(Exception):
+    """Ngoại lệ văng ra khi dữ liệu thẻ bị cũ hoặc không đồng bộ."""
+    pass
+
 # Khởi tạo đường dẫn tuyệt đối đến thư mục data/ để đảm bảo không bị lỗi path khi chạy từ các thư mục khác nhau
 BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
@@ -173,28 +177,32 @@ def initialize_data() -> None:
     if not LEADERBOARD_FILE.exists():
         save_leaderboard([])
 
-def load_cards() -> list[dict[str, Any]]:
-    """Đọc file cards.json an toàn với cơ chế bắt ngoại lệ."""
+def load_cards() -> tuple[list[dict[str, Any]], Any]:
+    """Đọc file cards.json an toàn với cơ chế bắt ngoại lệ.
+    Trả về tuple (cards, revision) để khớp với giao diện UI.
+    """
     try:
         with open(CARDS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            return json.load(f), None
     except FileNotFoundError:
         print("Cảnh báo: Không tìm thấy cards.json. Khởi tạo file mới cùng dữ liệu mẫu.")
         initialize_data()
-        return DEMO_CARDS
+        return DEMO_CARDS, None
     except json.JSONDecodeError:
         print("Lỗi nghiêm trọng: File cards.json bị hỏng định dạng (JSONDecodeError).")
-        return []
+        return [], None
 
-def save_cards(cards_data: list[dict[str, Any]]) -> bool:
-    """Ghi đè toàn bộ danh sách thẻ xuống file cards.json."""
+def save_cards(cards_data: list[dict[str, Any]], revision: Any = None) -> Any:
+    """Ghi đè toàn bộ danh sách thẻ xuống file cards.json.
+    Nhận thêm tham số revision và trả về revision mới để khớp với UI.
+    """
     try:
         with open(CARDS_FILE, 'w', encoding='utf-8') as f:
             json.dump(cards_data, f, ensure_ascii=False, indent=4)
-        return True
+        return None
     except Exception as e:
         print(f"Lỗi ghi file cards.json: {e}")
-        return False
+        return None
 
 def load_leaderboard() -> list[dict[str, Any]]:
     """Đọc dữ liệu lịch sử thi Minigame từ leaderboard.json."""
