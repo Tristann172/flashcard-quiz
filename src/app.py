@@ -97,15 +97,22 @@ def styles() -> None:
     """, unsafe_allow_html=True)
 
 
-class CardManagementView:
+class CardManagementController:
+    """Kết nối Manager với form và storage, không tạo kho thẻ hay stack riêng."""
 
-    STATE_KEY = "tab1_card_management"
+    def __init__(self):
+        self.manager = FlashcardManager()
+        # Card hiện chưa có hint/image/explanation. Giữ các trường bổ sung phẳng
+        # theo ID, tương tự Tab2DataAdapter, để không phải thay model của nhóm.
+        self.extras: dict[str, dict] = {}
+        self.revision = None
+        self.reload_cards()
 
-    def _load_cards(self) -> tuple[list[dict], None]:
+    def reload_cards(self) -> None:
         rows, revision = storage.load_cards()
         if not isinstance(rows, list):
             raise ValueError("Bộ thẻ phải là một danh sách.")
-        cards = []
+        cards, extras = [], {}
         for row in rows:
             if not isinstance(row, dict):
                 raise ValueError("Kho thẻ có bản ghi không hợp lệ. Hãy kiểm tra data/cards.json.")
@@ -114,41 +121,19 @@ class CardManagementView:
                 raise ValueError(f"Thẻ {card.id} thiếu đáp án Flashcard.")
             if row.get("quiz_question") and not card.is_game_ready():
                 raise ValueError(f"Thẻ {card.id} có Minigame không hợp lệ. Cần đủ phương án A–D và đáp án đúng.")
-            cards.append({
-                "id": card.id, "category": card.category, "difficulty": card.difficulty,
-                "flashcard": {"question": row.get("question", ""), "answer": row.get("answer", ""),
-                              "hint": row.get("hint", ""), "image": row.get("image")},
-                "minigame": {
-                    "question": row["quiz_question"],
-                    "options": {option["id"]: option["text"] for option in row.get("options", [])},
-                    "correct_ids": row.get("correct_option_ids", []),
-                    "explanation": row.get("explanation") or card.answer,
-                } if row.get("quiz_question") else None,
-            })
-        if len({card["id"] for card in cards}) != len(cards):
-            raise ValueError("Kho thẻ có ID trùng nhau.Hãy sửa ID trong data/cards.json trước khi tiếp tục")
-        return cards, revision
-
-    def _save_cards(self, cards: list[dict], revision: None) -> None:
-        rows = []
-        for card in cards:
-            game = card.get("minigame") or {}
-            row = {
-                "id": card["id"], "category": card["category"], "difficulty": card["difficulty"],
-                **card["flashcard"],
-                "quiz_question": game.get("question", ""),
-                "options": [{"id": key, "text": text} for key, text in game.get("options", {}).items()],
-                "correct_option_ids": game.get("correct_ids", []),
-            }
-            if game:
-                row["explanation"] = game.get("explanation", "")
-            rows.append(row)
-        return storage.save_cards(rows, revision)
+            if card.id in extras:
+                raise ValueError(f"Kho thẻ có ID trùng nhau: {card.id}.")
+            cards.append(card)
+            extras[card.id] = {key: deepcopy(value) for key, value in row.items()
+                               if key not in card.to_dict()}
+        # Kiểm tra toàn bộ dữ liệu trước khi thay kho thẻ và xóa lịch sử của Manager.
+        self.manager.load_cards(cards)
+        self.extras = extras
+        self.revision = revision
 
     def _prepare_card_values(self, values: dict) -> dict:
-        flash = values["flashcard"]
-        game = values["minigame"]
-        required = [flash["question"], flash["answer"], values["category"]]
+        """Kiểm tra dữ liệu form phẳng; model Card kiểm tra nội dung Minigame."""
+        required = [values["question"], values["answer"], values["category"]]
         if any(not isinstance(value, str) or not value.strip() for value in required):
             raise ValueError("Flashcard cần câu hỏi, đáp án và chủ đề.")
         category = values["category"].strip()
@@ -158,84 +143,88 @@ class CardManagementView:
         prepared = {
             "category": category,
             "difficulty": values["difficulty"],
-            "flashcard": {"question": flash["question"].strip(),
-                          "answer": flash["answer"].strip(),
-                          "hint": flash["hint"].strip(), "image": flash["image"]},
+            "question": values["question"].strip(),
+            "answer": values["answer"].strip(),
+            "hint": values["hint"].strip(), "image": values["image"],
+            "quiz_question": values["quiz_question"].strip(),
+            "options": [{"id": option["id"], "text": option["text"].strip()}
+                        for option in values["options"]],
+            "correct_option_ids": list(values["correct_option_ids"]),
+            "explanation": values["explanation"].strip(),
         }
-        options = game["options"]
-        correct = game["correct_ids"]
-        has_game = any((game["question"].strip(), game["explanation"].strip(),
-                        any(value.strip() for value in options.values()), bool(correct)))
+        has_game = any((prepared["quiz_question"], prepared["explanation"],
+                        any(option["text"] for option in prepared["options"]),
+                        prepared["correct_option_ids"]))
         if not has_game:
-            prepared["minigame"] = None
-            return prepared
-        if not game["question"].strip() or not game["explanation"].strip():
+            prepared.update(options=[], correct_option_ids=[])
+        elif not prepared["quiz_question"] or not prepared["explanation"]:
             raise ValueError("Khi thêm Minigame, hãy nhập câu hỏi và lời giải.")
-        if set(options) != set(CHOICES) or any(
-            not isinstance(options[key], str) or not options[key].strip() for key in CHOICES
-        ):
-            raise ValueError("Khi thêm Minigame, hãy nhập đủ bốn phương án A–D")
-        if not correct or any(key not in CHOICES for key in correct):
-            raise ValueError("Khi thêm Minigame, hãy chọn ít nhất một đáp án đúng")
-        prepared["minigame"] = {
-            "question": game["question"].strip(),
-            "options": {key: options[key].strip() for key in CHOICES},
-            "correct_ids": [key for key in CHOICES if key in correct],
-            "explanation": game["explanation"].strip(),
-        }
         return prepared
 
+    def _commit(self, manager: FlashcardManager, extras: dict[str, dict]) -> None:
+        rows = [{**deepcopy(extras.get(card.id, {})), **card.to_dict()}
+                for card in manager.get_all_cards()]
+        revision = storage.save_cards(rows, self.revision)
+        # storage hiện có thể nuốt lỗi ghi: đọc lại để không báo thành công giả.
+        saved_rows, _ = storage.load_cards()
+        if saved_rows != rows:
+            raise OSError("Chưa xác minh được bộ thẻ đã lưu. Hãy kiểm tra file và thử lại.")
+        self.manager = manager
+        self.extras = extras
+        self.revision = revision
+
+    def save_card(self, values: dict, card_id: str | None = None) -> Card:
+        prepared = self._prepare_card_values(values)
+        card = Card.from_dict({**prepared, "id": card_id or "c" + uuid4().hex[:12]})
+        if card.quiz_question and not card.is_game_ready():
+            raise ValueError("Minigame cần đủ bốn phương án A–D và đáp án đúng hợp lệ.")
+        # Bản làm việc chỉ tồn tại trong thao tác này; không phải lịch sử Undo.
+        # Nếu ghi thất bại, Manager hiện tại và stack của nó vẫn được giữ nguyên.
+        manager = deepcopy(self.manager)
+        if card_id is None:
+            if not manager.add_card(card):
+                raise ValueError("ID thẻ đã tồn tại. Hãy thử thêm lại.")
+        elif not manager.update_card(card_id, card):
+            raise ValueError("Thẻ cần sửa không còn tồn tại.")
+        extras = deepcopy(self.extras)
+        extras[card.id] = {**extras.get(card.id, {}),
+                           **{key: prepared[key] for key in ("hint", "image", "explanation")}}
+        self._commit(manager, extras)
+        return card
+
+    def delete_card(self, card_id: str) -> None:
+        manager = deepcopy(self.manager)
+        if not manager.delete_card(card_id):
+            raise ValueError("Thẻ cần xóa không còn tồn tại.")
+        # Giữ metadata theo ID để thẻ phục hồi bằng Manager vẫn có ảnh/gợi ý.
+        self._commit(manager, self.extras)
+
+    def undo(self) -> bool:
+        manager = deepcopy(self.manager)
+        if not manager.undo_last_action():
+            return False
+        self._commit(manager, self.extras)
+        return True
+
+
+class CardManagementView:
+
+    STATE_KEY = "tab1_card_management"
+
     def _manager_state(self) -> dict:
-        if self.STATE_KEY not in st.session_state:
-            cards, revision = self._load_cards()
+        if self.STATE_KEY not in st.session_state or "controller" not in st.session_state[self.STATE_KEY]:
             st.session_state[self.STATE_KEY] = {
-                "cards": cards, "revision": revision, "history": [],
+                "controller": CardManagementController(),
                 "editing_id": None, "form_version": 0, "show_form": False,
                 "notice": None,
             }
         return st.session_state[self.STATE_KEY]
 
     def reload_cards(self, state: dict) -> None:
-        cards, revision = self._load_cards()
-        state.update(cards=cards, revision=revision, history=[])
-        if state["editing_id"] is not None and not any(c["id"] == state["editing_id"] for c in cards):
+        controller = state["controller"]
+        controller.reload_cards()
+        if state["editing_id"] is not None and controller.manager.get_card(state["editing_id"]) is None:
             self.reset_form(state)
-
-    def _commit(self, state: dict, cards: list[dict], *, remember: bool = True) -> None:
-        previous = deepcopy(state["cards"])
-        new_revision = self._save_cards(cards, state["revision"])
-        if remember:
-            state["history"].append(previous)
-        state["cards"] = deepcopy(cards)
-        state["revision"] = new_revision
-
-    def save_card(self, state: dict, values: dict, card_id: str | None = None) -> dict:
-        new_id = card_id or "c" + uuid4().hex[:12]
-        card = {"id": new_id, **self._prepare_card_values(values)}
-        cards = deepcopy(state["cards"])
-        if card_id is None:
-            cards.append(card)
-        else:
-            index = next((i for i, item in enumerate(cards) if item["id"] == card_id), None)
-            if index is None:
-                raise ValueError("Thẻ cần sửa không còn tồn tại.")
-            cards[index] = card
-        self._commit(state, cards)
-        return card
-
-    def delete_card(self, state: dict, card_id: str) -> None:
-        cards = [c for c in state["cards"] if c["id"] != card_id]
-        if len(cards) == len(state["cards"]):
-            raise ValueError("Thẻ cần xóa không còn tồn tại.")
-        self._commit(state, cards)
-
-    def undo(self, state: dict) -> bool:
-        if not state["history"]:
-            return False
-        previous = state["history"][-1]
-        self._commit(state, previous, remember=False)
-        state["history"].pop()
-        return True
 
     def reset_form(self, state: dict) -> None:
         state["editing_id"] = None
@@ -246,51 +235,51 @@ class CardManagementView:
         return base64.b64decode(image["data"]) if image else None
 
     def render_form(self, state: dict) -> None:
-        cards = state["cards"]
-        editing = next((c for c in cards if c["id"] == state["editing_id"]), None)
-        flash = editing["flashcard"] if editing else {}
-        game = (editing.get("minigame") or {}) if editing else {}
-        options = game.get("options", {})
-        categories = sorted(set(CATEGORIES) | {c["category"] for c in cards})
+        controller = state["controller"]
+        editing = controller.manager.get_card(state["editing_id"])
+        values = editing.to_dict() if editing else {}
+        extra = controller.extras.get(editing.id, {}) if editing else {}
+        options = {option["id"]: option["text"] for option in values.get("options", [])}
+        categories = sorted(set(CATEGORIES) | controller.manager.get_all_categories())
         version = state["form_version"]
         with st.container(key="tab1_editor"):
             st.markdown("### ✏️ Chỉnh sửa thẻ" if editing else "### ✏️ Tạo thẻ mới")
             if editing:
-                st.caption(f"Đang sửa thẻ {editing['id']}")
+                st.caption(f"Đang sửa thẻ {editing.id}")
             with st.form(f"tab1_form_{version}"):
                 flash_col, game_col = st.columns(2, gap="large")
                 with flash_col:
                     st.markdown("#### Phần Flashcard")
                     st.caption("Bắt buộc: câu hỏi, đáp án, chủ đề và độ khó.")
-                    question = st.text_area("Câu hỏi (mặt trước) *", value=flash.get("question", ""),
+                    question = st.text_area("Câu hỏi (mặt trước) *", value=values.get("question", ""),
                                             placeholder="Nhập câu hỏi...", height=90,
                                             key=f"tab1_question_{version}")
-                    answer = st.text_area("Đáp án (mặt sau) *", value=flash.get("answer", ""),
+                    answer = st.text_area("Đáp án (mặt sau) *", value=values.get("answer", ""),
                                           placeholder="Nhập câu trả lời...", height=90,
                                           key=f"tab1_answer_{version}")
                     category_col, difficulty_col = st.columns(2)
                     with category_col:
                         category = st.selectbox("Chủ đề *", categories,
-                                                index=categories.index(editing["category"] if editing else "OOP"),
+                                                index=categories.index(editing.category if editing else "OOP"),
                                                 accept_new_options=True, key=f"tab1_category_{version}")
                     with difficulty_col:
                         difficulty = st.selectbox("Độ khó *", list(LEVELS),
-                                                  index=list(LEVELS).index(editing["difficulty"] if editing else "Easy"),
+                                                  index=list(LEVELS).index(editing.difficulty if editing else "Easy"),
                                                   format_func=LEVELS.get,
                                                   key=f"tab1_difficulty_{version}")
-                    hint = st.text_input("Gợi ý (không bắt buộc)", value=flash.get("hint", ""),
+                    hint = st.text_input("Gợi ý (không bắt buộc)", value=extra.get("hint", ""),
                                          key=f"tab1_hint_{version}")
                     upload = st.file_uploader("Ảnh PNG, JPG hoặc WEBP (không bắt buộc, tối đa 2 MB)",
                                               type=["png", "jpg", "jpeg", "webp"],
                                               max_upload_size=2, key=f"tab1_image_{version}")
                     remove_image = False
-                    if flash.get("image"):
+                    if extra.get("image"):
                         st.caption("Ảnh hiện tại được giữ nếu không chọn ảnh mới.")
                         remove_image = st.checkbox("Xóa ảnh hiện tại", key=f"tab1_remove_image_{version}")
                 with game_col:
                     st.markdown("#### Phần Minigame · không bắt buộc")
                     st.caption("Có thể để trống toàn bộ và bổ sung sau. Nếu thêm, cần điền đủ các mục bên dưới.")
-                    game_question = st.text_area("Câu hỏi Minigame", value=game.get("question", ""),
+                    game_question = st.text_area("Câu hỏi Minigame", value=values.get("quiz_question", ""),
                                                  height=90, key=f"tab1_game_question_{version}")
                     game_options = {}
                     for left, right in (("A", "B"), ("C", "D")):
@@ -299,9 +288,11 @@ class CardManagementView:
                             game_options[key] = column.text_input(f"Đáp án {key}", value=options.get(key, ""),
                                                                   key=f"tab1_option_{key}_{version}")
                     correct = st.multiselect("Đáp án đúng (chọn một hoặc nhiều)", CHOICES,
-                                             default=game.get("correct_ids", []),
+                                             default=values.get("correct_option_ids", []),
                                              key=f"tab1_correct_{version}")
-                    explanation = st.text_area("Lời giải Minigame", value=game.get("explanation", ""),
+                    explanation = st.text_area("Lời giải Minigame",
+                                               value=extra.get("explanation") or
+                                               (editing.answer if editing and editing.quiz_question else ""),
                                                height=80, key=f"tab1_explanation_{version}")
                 save_col, cancel_col = st.columns(2)
                 save = save_col.form_submit_button("Cập nhật thẻ" if editing else "Thêm thẻ",
@@ -313,42 +304,42 @@ class CardManagementView:
                 state["show_form"] = editing is None
                 st.rerun()
             if save:
-                image = None if remove_image else flash.get("image")
+                image = None if remove_image else extra.get("image")
                 if upload is not None:
                     image = {"mime": upload.type,
                              "data": base64.b64encode(upload.getvalue()).decode("ascii")}
                 values = {"category": category, "difficulty": difficulty,
-                          "flashcard": {"question": question, "answer": answer,
-                                        "hint": hint, "image": image},
-                          "minigame": {"question": game_question,
-                                       "options": game_options, "correct_ids": correct,
-                                       "explanation": explanation}}
+                          "question": question, "answer": answer,
+                          "hint": hint, "image": image,
+                          "quiz_question": game_question,
+                          "options": [{"id": key, "text": text} for key, text in game_options.items()],
+                          "correct_option_ids": correct, "explanation": explanation}
                 try:
-                    result = self.save_card(state, values, editing["id"] if editing else None)
+                    result = controller.save_card(values, editing.id if editing else None)
                 except DATA_ERRORS as error:
                     st.error(str(error))
                 else:
                     self.reset_form(state)
-                    mode = "kèm Minigame" if result.get("minigame") else "chỉ gồm Flashcard"
-                    state["notice"] = f"Đã {'cập nhật' if editing else 'thêm'} thẻ {result['id']} {mode}."
+                    mode = "kèm Minigame" if result.is_game_ready() else "chỉ gồm Flashcard"
+                    state["notice"] = f"Đã {'cập nhật' if editing else 'thêm'} thẻ {result.id} {mode}."
                     st.rerun()
 
     def render_library(self, state: dict) -> None:
-        cards = state["cards"]
+        controller = state["controller"]
+        cards = controller.manager.get_all_cards()
         with st.container(key="tab1_library"):
             header, count = st.columns([3, 1], vertical_alignment="center")
             header.markdown("### Bộ câu hỏi")
             count.markdown(f"**{len(cards)} câu**")
-            categories = sorted({c["category"] for c in cards})
+            categories = sorted(controller.manager.get_all_categories())
             if st.session_state.get("tab1_filter") not in ["Tất cả", *categories]:
                 st.session_state["tab1_filter"] = "Tất cả"
             search_col, filter_col = st.columns([3, 1])
             search = search_col.text_input("Tìm câu hỏi", key="tab1_search",
                                            placeholder="🔍 Nhập từ khóa...").strip().casefold()
             selected = filter_col.selectbox("Chủ đề", ["Tất cả", *categories], key="tab1_filter")
-            visible = [c for c in cards if (selected == "Tất cả" or c["category"] == selected)
-                       and (search in c["flashcard"]["question"].casefold()
-                            or search in (c.get("minigame") or {}).get("question", "").casefold())]
+            visible = [c for c in cards if (selected == "Tất cả" or c.category == selected)
+                       and (search in c.question.casefold() or search in c.quiz_question.casefold())]
             if not cards:
                 st.info("Chưa có câu hỏi trong bộ thẻ.")
             elif not visible:
@@ -356,44 +347,45 @@ class CardManagementView:
             else:
                 with st.container(height=430, border=False):
                     for card in visible:
-                        with st.container(border=True, key=f"tab1_card_{card['id']}"):
-                            st.markdown(f"**{card['flashcard']['question']}**")
-                            game_status = "có Minigame" if card.get("minigame") else "chưa có Minigame"
-                            st.caption(f"{card['id']} · {card['category']} · "
-                                       f"{LEVELS[card['difficulty']]} · {game_status}")
+                        extra = controller.extras.get(card.id, {})
+                        with st.container(border=True, key=f"tab1_card_{card.id}"):
+                            st.markdown(f"**{card.question}**")
+                            game_status = "có Minigame" if card.is_game_ready() else "chưa có Minigame"
+                            st.caption(f"{card.id} · {card.category} · "
+                                       f"{LEVELS[card.difficulty]} · {game_status}")
                             with st.expander("Xem đáp án"):
-                                st.write(card["flashcard"]["answer"])
-                                if card["flashcard"].get("hint"):
-                                    st.caption("Gợi ý: " + card["flashcard"]["hint"])
-                                if card["flashcard"].get("image"):
+                                st.write(card.answer)
+                                if extra.get("hint"):
+                                    st.caption("Gợi ý: " + extra["hint"])
+                                if extra.get("image"):
                                     try:
-                                        st.image(self._image_bytes(card["flashcard"]["image"]))
+                                        st.image(self._image_bytes(extra["image"]))
                                     except (OSError, ValueError, TypeError, KeyError):
                                         st.caption("Không thể hiển thị ảnh của thẻ này. Chọn Sửa để thay hoặc xóa ảnh.")
-                                if card.get("minigame"):
+                                if card.is_game_ready():
                                     st.divider()
-                                    st.write("**Minigame:**", card["minigame"]["question"])
-                                    for key, option in card["minigame"]["options"].items():
-                                        st.write(f"{key}. {option}")
-                                    st.caption("Đáp án đúng: " + ", ".join(card["minigame"]["correct_ids"]))
-                                    st.info(card["minigame"]["explanation"])
+                                    st.write("**Minigame:**", card.quiz_question)
+                                    for option in card.options:
+                                        st.write(f"{option['id']}. {option['text']}")
+                                    st.caption("Đáp án đúng: " + ", ".join(card.correct_option_ids))
+                                    st.info(extra.get("explanation") or card.answer)
                                 else:
                                     st.caption("Chưa có Minigame. Chọn Sửa để bổ sung khi cần.")
                             edit_col, delete_col = st.columns(2)
-                            if edit_col.button("✏️ Sửa", key=f"tab1_edit_{card['id']}", width="stretch"):
-                                state["editing_id"] = card["id"]
+                            if edit_col.button("✏️ Sửa", key=f"tab1_edit_{card.id}", width="stretch"):
+                                state["editing_id"] = card.id
                                 state["show_form"] = True
                                 state["form_version"] += 1
                                 st.rerun()
-                            if delete_col.button("🗑️ Xóa", key=f"tab1_delete_{card['id']}", width="stretch"):
+                            if delete_col.button("🗑️ Xóa", key=f"tab1_delete_{card.id}", width="stretch"):
                                 try:
-                                    self.delete_card(state, card["id"])
+                                    controller.delete_card(card.id)
                                 except DATA_ERRORS as error:
                                     st.error(str(error))
                                 else:
-                                    if state["editing_id"] == card["id"]:
+                                    if state["editing_id"] == card.id:
                                         self.reset_form(state)
-                                    state["notice"] = f"Đã xóa thẻ {card['id']}. Có thể hoàn tác."
+                                    state["notice"] = f"Đã xóa thẻ {card.id}. Có thể hoàn tác xóa."
                                     st.rerun()
 
     def render(self) -> None:
@@ -425,12 +417,12 @@ class CardManagementView:
             else:
                 state["notice"] = "Đã nạp lại bộ thẻ. Biểu mẫu đang nhập được giữ để bạn kiểm tra và lưu lại."
                 st.rerun()
-        if undo_col.button("↩ Hoàn tác", key="tab1_undo",
-                           disabled=not state["history"], width="stretch"):
+        if undo_col.button("↩ Hoàn tác xóa", key="tab1_undo",
+                           disabled=not state["controller"].manager.can_undo(), width="stretch"):
             try:
-                if self.undo(state):
+                if state["controller"].undo():
                     self.reset_form(state)
-                    state["notice"] = "Đã hoàn tác và lưu bộ thẻ."
+                    state["notice"] = "Đã hoàn tác xóa và lưu bộ thẻ."
                     st.rerun()
             except DATA_ERRORS as error:
                 st.error(str(error))
