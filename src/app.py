@@ -102,8 +102,8 @@ class CardManagementController:
 
     def __init__(self):
         self.manager = FlashcardManager()
-        # Card hiện chưa có hint/image/explanation. Giữ các trường bổ sung phẳng
-        # theo ID, tương tự Tab2DataAdapter, để không phải thay model của nhóm.
+        # Card hiện chưa có explanation. Giữ lời giải và các trường bổ sung
+        # từ file theo ID để không phải thay model hoặc mất dữ liệu cũ.
         self.extras: dict[str, dict] = {}
         self.revision = None
         self.reload_cards()
@@ -145,7 +145,6 @@ class CardManagementController:
             "difficulty": values["difficulty"],
             "question": values["question"].strip(),
             "answer": values["answer"].strip(),
-            "hint": values["hint"].strip(), "image": values["image"],
             "quiz_question": values["quiz_question"].strip(),
             "options": [{"id": option["id"], "text": option["text"].strip()}
                         for option in values["options"]],
@@ -187,8 +186,7 @@ class CardManagementController:
         elif not manager.update_card(card_id, card):
             raise ValueError("Thẻ cần sửa không còn tồn tại.")
         extras = deepcopy(self.extras)
-        extras[card.id] = {**extras.get(card.id, {}),
-                           **{key: prepared[key] for key in ("hint", "image", "explanation")}}
+        extras[card.id] = {**extras.get(card.id, {}), "explanation": prepared["explanation"]}
         self._commit(manager, extras)
         return card
 
@@ -196,7 +194,7 @@ class CardManagementController:
         manager = deepcopy(self.manager)
         if not manager.delete_card(card_id):
             raise ValueError("Thẻ cần xóa không còn tồn tại.")
-        # Giữ metadata theo ID để thẻ phục hồi bằng Manager vẫn có ảnh/gợi ý.
+        # Giữ lời giải theo ID để có thể phục hồi cùng thẻ bằng Manager.
         self._commit(manager, self.extras)
 
     def undo(self) -> bool:
@@ -231,9 +229,6 @@ class CardManagementView:
         state["show_form"] = False
         state["form_version"] += 1
 
-    def _image_bytes(self, image: dict | None) -> bytes | None:
-        return base64.b64decode(image["data"]) if image else None
-
     def render_form(self, state: dict) -> None:
         controller = state["controller"]
         editing = controller.manager.get_card(state["editing_id"])
@@ -267,15 +262,6 @@ class CardManagementView:
                                                   index=list(LEVELS).index(editing.difficulty if editing else "Easy"),
                                                   format_func=LEVELS.get,
                                                   key=f"tab1_difficulty_{version}")
-                    hint = st.text_input("Gợi ý (không bắt buộc)", value=extra.get("hint", ""),
-                                         key=f"tab1_hint_{version}")
-                    upload = st.file_uploader("Ảnh PNG, JPG hoặc WEBP (không bắt buộc, tối đa 2 MB)",
-                                              type=["png", "jpg", "jpeg", "webp"],
-                                              max_upload_size=2, key=f"tab1_image_{version}")
-                    remove_image = False
-                    if extra.get("image"):
-                        st.caption("Ảnh hiện tại được giữ nếu không chọn ảnh mới.")
-                        remove_image = st.checkbox("Xóa ảnh hiện tại", key=f"tab1_remove_image_{version}")
                 with game_col:
                     st.markdown("#### Phần Minigame · không bắt buộc")
                     st.caption("Có thể để trống toàn bộ và bổ sung sau. Nếu thêm, cần điền đủ các mục bên dưới.")
@@ -304,13 +290,8 @@ class CardManagementView:
                 state["show_form"] = editing is None
                 st.rerun()
             if save:
-                image = None if remove_image else extra.get("image")
-                if upload is not None:
-                    image = {"mime": upload.type,
-                             "data": base64.b64encode(upload.getvalue()).decode("ascii")}
                 values = {"category": category, "difficulty": difficulty,
                           "question": question, "answer": answer,
-                          "hint": hint, "image": image,
                           "quiz_question": game_question,
                           "options": [{"id": key, "text": text} for key, text in game_options.items()],
                           "correct_option_ids": correct, "explanation": explanation}
@@ -355,13 +336,6 @@ class CardManagementView:
                                        f"{LEVELS[card.difficulty]} · {game_status}")
                             with st.expander("Xem đáp án"):
                                 st.write(card.answer)
-                                if extra.get("hint"):
-                                    st.caption("Gợi ý: " + extra["hint"])
-                                if extra.get("image"):
-                                    try:
-                                        st.image(self._image_bytes(extra["image"]))
-                                    except (OSError, ValueError, TypeError, KeyError):
-                                        st.caption("Không thể hiển thị ảnh của thẻ này. Chọn Sửa để thay hoặc xóa ảnh.")
                                 if card.is_game_ready():
                                     st.divider()
                                     st.write("**Minigame:**", card.quiz_question)
