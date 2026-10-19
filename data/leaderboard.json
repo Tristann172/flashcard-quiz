@@ -16,5 +16,519 @@
         "total_score": 980,
         "completion_time": "05:00",
         "rank": 3
+    },
+    {
+        "session_id": "f5c1778b07184333b02cd5bd8276dd0d",
+        "total_score": 172,
+        "total_questions": 8,
+        "correct_count": 6,
+        "accuracy_percentage": 75.0,
+        "history": [
+            {
+                "card_id": "c6",
+                "is_correct": true,
+                "time_left": 8,
+                "points_gained": 38,
+                "streak": 1,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c4",
+                "is_correct": true,
+                "time_left": 11,
+                "points_gained": 20,
+                "streak": 2,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c2",
+                "is_correct": true,
+                "time_left": 16,
+                "points_gained": 25,
+                "streak": 3,
+                "multiplier": 1.5
+            },
+            {
+                "card_id": "c3",
+                "is_correct": true,
+                "time_left": 13,
+                "points_gained": 40,
+                "streak": 4,
+                "multiplier": 1.5
+            },
+            {
+                "card_id": "c1",
+                "is_correct": true,
+                "time_left": 9,
+                "points_gained": 29,
+                "streak": 5,
+                "multiplier": 2.0
+            },
+            {
+                "card_id": "c7",
+                "is_correct": false,
+                "time_left": 1,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c8",
+                "is_correct": true,
+                "time_left": 16,
+                "points_gained": 20,
+                "streak": 1,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c5",
+                "is_correct": false,
+                "time_left": 18,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            }
+        ],
+        "model_session_id": "GAME005",
+        "run_id": "f5c1778b07184333b02cd5bd8276dd0d",
+        "player_name": "Triii",
+        "category": "All",
+        "answered_count": 8,
+        "elapsed_seconds": 72.578,
+        "completion_time": "01:13",
+        "max_streak": 5,
+        "config_id": "29ce2fe22e8a06959addaa0b5ae2c01a0d153d82ebecfbce3ed6ad29df7f6aca",
+        "kind": "ranked",
+        "seconds_per_question": 20,
+        "question_ids": [
+            "c6",
+            "c4",
+            "c2",
+            "c3",
+            "c1",
+            "c7",
+            "c8",
+            "c5"
+        ],
+        "played_at": "2026-10-19T05:35:42.277052+00:00",
+        "rank": 4
+    },
+    {
+        "session_id": "326b2ebec3cb4982b7a94157513f4568",
+        "total_score": 145,
+        "total_questions": 5,
+        "correct_count": 4,
+        "accuracy_percentage": 80.0,
+        "history": [
+            {
+                "card_id": "c3",
+                "is_correct": true,
+                "time_left": 14,
+                "points_gained": 30,
+                "streak": 1,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c2",
+                "is_correct": true,
+                "time_left": 16,
+                "points_gained": 20,
+                "streak": 2,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c6",
+                "is_correct": true,
+                "time_left": 15,
+                "points_gained": 55,
+                "streak": 3,
+                "multiplier": 1.5
+            },
+            {
+                "card_id": "c7",
+                "is_correct": true,
+                "time_left": 13,
+                "points_gained": 40,
+                "streak": 4,
+                "multiplier": 1.5
+            },
+            {
+                "card_id": "c4",
+                "is_correct": false,
+                "time_left": 7,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            }
+        ],
+        "model_session_id": "GAME003",
+        "run_id": "326b2ebec3cb4982b7a94157513f4568",
+        "player_name": "k",
+        "category": "All",
+        "answered_count": 5,
+        "elapsed_seconds": 37.546,
+        "completion_time": "00:38",
+        "max_streak": 4,
+        "config_id": "794ce1252862ed19f194a4b889ceaea8d48df30520249b412b9b97f32e9e76ec",
+        "kind": "ranked",
+        "seconds_per_question": 20,
+        "question_ids": [
+            "c3",
+            "c2",
+            "c6",
+            "c7",
+            "c4"
+        ],
+        "played_at": "2026-10-19T05:54:13.422127+00:00",
+        "rank": 5
+    },
+    {
+        "session_id": "68992f6b01d74c4196f84cbb608b6e1d",
+        "total_score": 130,
+        "total_questions": 5,
+        "correct_count": 5,
+        "accuracy_percentage": 100.0,
+        "history": [
+            {
+                "card_id": "c1",
+                "is_correct": true,
+                "time_left": 6,
+                "points_gained": 16,
+                "streak": 1,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c6",
+                "is_correct": true,
+                "time_left": 4,
+                "points_gained": 34,
+                "streak": 2,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c8",
+                "is_correct": true,
+                "time_left": 11,
+                "points_gained": 25,
+                "streak": 3,
+                "multiplier": 1.5
+            },
+            {
+                "card_id": "c2",
+                "is_correct": true,
+                "time_left": 11,
+                "points_gained": 25,
+                "streak": 4,
+                "multiplier": 1.5
+            },
+            {
+                "card_id": "c4",
+                "is_correct": true,
+                "time_left": 13,
+                "points_gained": 30,
+                "streak": 5,
+                "multiplier": 2.0
+            }
+        ],
+        "model_session_id": "GAME002",
+        "run_id": "68992f6b01d74c4196f84cbb608b6e1d",
+        "player_name": "tao",
+        "category": "All",
+        "answered_count": 5,
+        "elapsed_seconds": 57.607,
+        "completion_time": "00:58",
+        "max_streak": 5,
+        "config_id": "9d0a05cc9743f110c3c91b3b88ec3c6eeefa8b2170f18417921d86150a41b91d",
+        "kind": "practice_unanswered",
+        "seconds_per_question": 20,
+        "question_ids": [
+            "c1",
+            "c6",
+            "c8",
+            "c2",
+            "c4"
+        ],
+        "played_at": "2026-10-19T05:47:59.270077+00:00",
+        "rank": 6
+    },
+    {
+        "session_id": "45822239ec4e4655bfb492f1b7048899",
+        "total_score": 41,
+        "total_questions": 5,
+        "correct_count": 2,
+        "accuracy_percentage": 40.0,
+        "history": [
+            {
+                "card_id": "c3",
+                "is_correct": false,
+                "time_left": 16,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c7",
+                "is_correct": true,
+                "time_left": 1,
+                "points_gained": 21,
+                "streak": 1,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c5",
+                "is_correct": false,
+                "time_left": 16,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c1",
+                "is_correct": false,
+                "time_left": 17,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c2",
+                "is_correct": true,
+                "time_left": 18,
+                "points_gained": 20,
+                "streak": 1,
+                "multiplier": 1.0
+            }
+        ],
+        "model_session_id": "GAME003",
+        "run_id": "45822239ec4e4655bfb492f1b7048899",
+        "player_name": "tri",
+        "category": "All",
+        "answered_count": 5,
+        "elapsed_seconds": 35.14,
+        "completion_time": "00:36",
+        "max_streak": 1,
+        "config_id": "d10dcd27b6b2ef80f7b93a30961a250cbb51839de9e842ac1b08a2c6fcc610ff",
+        "kind": "ranked",
+        "seconds_per_question": 20,
+        "question_ids": [
+            "c3",
+            "c7",
+            "c5",
+            "c1",
+            "c2"
+        ],
+        "played_at": "2026-10-19T05:28:07.093550+00:00",
+        "rank": 7
+    },
+    {
+        "session_id": "e84ee98446a74ec39268d3a9c4b87808",
+        "total_score": 40,
+        "total_questions": 4,
+        "correct_count": 2,
+        "accuracy_percentage": 50.0,
+        "history": [
+            {
+                "card_id": "c1",
+                "is_correct": false,
+                "time_left": 16,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c2",
+                "is_correct": false,
+                "time_left": 17,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c4",
+                "is_correct": true,
+                "time_left": 16,
+                "points_gained": 20,
+                "streak": 1,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c8",
+                "is_correct": true,
+                "time_left": 15,
+                "points_gained": 20,
+                "streak": 2,
+                "multiplier": 1.0
+            }
+        ],
+        "model_session_id": "GAME002",
+        "run_id": "e84ee98446a74ec39268d3a9c4b87808",
+        "player_name": "Mtri",
+        "category": "All",
+        "answered_count": 4,
+        "elapsed_seconds": 17.767,
+        "completion_time": "00:18",
+        "max_streak": 2,
+        "config_id": "e799b20afec7b1ed19462a369654ae4125599860ed4eb1c6e0f7f56f2b6277fc",
+        "kind": "practice_wrong",
+        "seconds_per_question": 20,
+        "question_ids": [
+            "c1",
+            "c2",
+            "c4",
+            "c8"
+        ],
+        "played_at": "2026-10-19T05:22:37.788239+00:00",
+        "rank": 8
+    },
+    {
+        "session_id": "c975607446e3431ea3c0bd08e8c82424",
+        "total_score": 25,
+        "total_questions": 8,
+        "correct_count": 1,
+        "accuracy_percentage": 20.0,
+        "history": [
+            {
+                "card_id": "c1",
+                "is_correct": false,
+                "time_left": 13,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c8",
+                "is_correct": false,
+                "time_left": 10,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c7",
+                "is_correct": true,
+                "time_left": 5,
+                "points_gained": 25,
+                "streak": 1,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c4",
+                "is_correct": false,
+                "time_left": 15,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c2",
+                "is_correct": false,
+                "time_left": 13,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            }
+        ],
+        "model_session_id": "GAME001",
+        "run_id": "c975607446e3431ea3c0bd08e8c82424",
+        "player_name": "Mtri",
+        "category": "All",
+        "answered_count": 5,
+        "elapsed_seconds": 51.938,
+        "completion_time": "00:52",
+        "max_streak": 1,
+        "config_id": "29ce2fe22e8a06959addaa0b5ae2c01a0d153d82ebecfbce3ed6ad29df7f6aca",
+        "kind": "ranked",
+        "seconds_per_question": 20,
+        "question_ids": [
+            "c1",
+            "c8",
+            "c7",
+            "c4",
+            "c2",
+            "c5",
+            "c6",
+            "c3"
+        ],
+        "played_at": "2026-10-19T05:21:50.296743+00:00",
+        "rank": 9
+    },
+    {
+        "session_id": "292fa814d07845148a1a908713cc8081",
+        "total_score": 17,
+        "total_questions": 3,
+        "correct_count": 1,
+        "accuracy_percentage": 33.33,
+        "history": [
+            {
+                "card_id": "c1",
+                "is_correct": true,
+                "time_left": 7,
+                "points_gained": 17,
+                "streak": 1,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c5",
+                "is_correct": false,
+                "time_left": 3,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            },
+            {
+                "card_id": "c3",
+                "is_correct": false,
+                "time_left": 18,
+                "points_gained": 0,
+                "streak": 0,
+                "multiplier": 1.0
+            }
+        ],
+        "model_session_id": "GAME004",
+        "run_id": "292fa814d07845148a1a908713cc8081",
+        "player_name": "tri",
+        "category": "All",
+        "answered_count": 3,
+        "elapsed_seconds": 34.484,
+        "completion_time": "00:35",
+        "max_streak": 1,
+        "config_id": "3ab7f88ab8f8fd45577712a74d632e9b4b104b594b93fe8edc3b867a2c8428fa",
+        "kind": "practice_wrong",
+        "seconds_per_question": 20,
+        "question_ids": [
+            "c1",
+            "c5",
+            "c3"
+        ],
+        "played_at": "2026-10-19T05:28:58.609696+00:00",
+        "rank": 10
+    },
+    {
+        "session_id": "cf6096f2c3ca4e859ddf2b602db49f1e",
+        "total_score": 0,
+        "total_questions": 5,
+        "correct_count": 0,
+        "accuracy_percentage": 0.0,
+        "history": [],
+        "model_session_id": "GAME001",
+        "run_id": "cf6096f2c3ca4e859ddf2b602db49f1e",
+        "player_name": "tao",
+        "category": "All",
+        "answered_count": 0,
+        "elapsed_seconds": 3.985,
+        "completion_time": "00:04",
+        "max_streak": 0,
+        "config_id": "9d0a05cc9743f110c3c91b3b88ec3c6eeefa8b2170f18417921d86150a41b91d",
+        "kind": "ranked",
+        "seconds_per_question": 20,
+        "question_ids": [
+            "c8",
+            "c2",
+            "c4",
+            "c1",
+            "c6"
+        ],
+        "played_at": "2026-10-19T05:46:45.976538+00:00",
+        "rank": 11
     }
 ]
