@@ -1,6 +1,10 @@
 import json
 import os
+import hashlib
+from copy import deepcopy
 from pathlib import Path
+from tempfile import NamedTemporaryFile
+from threading import RLock
 from typing import Any
 
 class StaleCardsError(Exception):
@@ -12,6 +16,37 @@ BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
 CARDS_FILE = DATA_DIR / 'cards.json'
 LEADERBOARD_FILE = DATA_DIR / 'leaderboard.json'
+_STORAGE_LOCK = RLock()
+
+
+def _read_list(path: Path) -> tuple[list[Any], str]:
+    raw = path.read_bytes()
+    try:
+        rows = json.loads(raw.decode('utf-8'))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"{path.name} không phải JSON hợp lệ. Hãy sửa hoặc khôi phục file; dữ liệu chưa bị ghi đè.") from error
+    if not isinstance(rows, list):
+        raise ValueError(f"{path.name} phải chứa một danh sách JSON.")
+    return rows, hashlib.sha256(raw).hexdigest()
+
+
+def _write_list(path: Path, rows: list[Any]) -> str:
+    if not isinstance(rows, list):
+        raise ValueError("Dữ liệu cần lưu phải là một danh sách.")
+    raw = json.dumps(rows, ensure_ascii=False, indent=4, allow_nan=False).encode('utf-8')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with NamedTemporaryFile(mode='wb', dir=path.parent, suffix='.tmp', delete=False) as file:
+            temporary = Path(file.name)
+            file.write(raw)
+            file.flush()
+            os.fsync(file.fileno())
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None and temporary.exists():
+            temporary.unlink()
+    return hashlib.sha256(raw).hexdigest()
 
 # Dữ liệu 10 thẻ mẫu (Demo data) chuẩn kỹ thuật theo mục 2.3
 DEMO_CARDS = [
@@ -177,41 +212,27 @@ def initialize_data() -> None:
     if not LEADERBOARD_FILE.exists():
         save_leaderboard([])
 
-def load_cards() -> tuple[list[dict[str, Any]], Any]:
-    """Đọc file cards.json an toàn với cơ chế bắt ngoại lệ.
-    Trả về tuple (cards, revision) để khớp với giao diện UI.
-    """
-    try:
-        with open(CARDS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f), None
-    except FileNotFoundError:
-        print("Cảnh báo: Không tìm thấy cards.json. Khởi tạo file mới cùng dữ liệu mẫu.")
-        initialize_data()
-        return DEMO_CARDS, None
-    except json.JSONDecodeError:
-        print("Lỗi nghiêm trọng: File cards.json bị hỏng định dạng (JSONDecodeError).")
-        return [], None
+def load_cards() -> tuple[list[dict[str, Any]], str]:
+    with _STORAGE_LOCK:
+        if not CARDS_FILE.exists():
+            initialize_data()
+        return _read_list(CARDS_FILE)
 
-def save_cards(cards_data: list[dict[str, Any]], revision: Any = None) -> Any:
-    """Ghi đè toàn bộ danh sách thẻ xuống file cards.json.
-    Nhận thêm tham số revision và trả về revision mới để khớp với UI.
-    """
-    try:
-        with open(CARDS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(cards_data, f, ensure_ascii=False, indent=4)
-        return None
-    except Exception as e:
-        print(f"Lỗi ghi file cards.json: {e}")
-        return None
+def save_cards(cards_data: list[dict[str, Any]], revision: str | None = None) -> str:
+    with _STORAGE_LOCK:
+        if CARDS_FILE.exists():
+            _, current_revision = _read_list(CARDS_FILE)
+            if revision is not None and revision != current_revision:
+                raise StaleCardsError("Bộ thẻ đã được thay đổi ở phiên khác. Bấm Nạp lại rồi thực hiện lại thao tác; nội dung biểu mẫu vẫn được giữ.")
+        elif revision is not None:
+            raise StaleCardsError("File bộ thẻ đã bị di chuyển hoặc xóa. Hãy kiểm tra data/cards.json rồi bấm Nạp lại.")
+        return _write_list(CARDS_FILE, cards_data)
 
 def load_leaderboard() -> list[dict[str, Any]]:
-    """Đọc dữ liệu lịch sử thi Minigame từ leaderboard.json."""
-    try:
-        with open(LEADERBOARD_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        # Trả về mảng rỗng nếu chưa có file hoặc file lỗi để không crash app
-        return []
+    with _STORAGE_LOCK:
+        if not LEADERBOARD_FILE.exists():
+            return []
+        return _read_list(LEADERBOARD_FILE)[0]
 
 def save_leaderboard(leaderboard_data: list[dict[str, Any]]) -> bool:
     """
@@ -222,22 +243,24 @@ def save_leaderboard(leaderboard_data: list[dict[str, Any]]) -> bool:
     cần đảm bảo có chứa các key như 'player_name', 'total_score', 'completion_time' 
     để việc lưu trữ và hiển thị được đầy đủ thông tin.
     """
-    # Sắp xếp mảng điểm giảm dần
-    leaderboard_data.sort(key=lambda x: x.get('total_score', 0), reverse=True)
+    leaderboard_data = sorted(deepcopy(leaderboard_data),
+                              key=lambda x: x.get('total_score', 0), reverse=True)
     
     # Đánh lại rank tự động
     for index, record in enumerate(leaderboard_data):
         record['rank'] = index + 1
 
     try:
-        with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
-            json.dump(leaderboard_data, f, ensure_ascii=False, indent=4)
+        with _STORAGE_LOCK:
+            if LEADERBOARD_FILE.exists():
+                _read_list(LEADERBOARD_FILE)
+            _write_list(LEADERBOARD_FILE, leaderboard_data)
         return True
-    except Exception as e:
+    except OSError as e:
         print(f"Lỗi ghi file leaderboard.json: {e}")
         return False
 
-def reload_data() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def reload_data() -> tuple[tuple[list[dict[str, Any]], str], list[dict[str, Any]]]:
     """Hàm nạp lại toàn bộ dữ liệu (Phục vụ cho nút Reload trên UI Streamlit)."""
     # Gọi khởi tạo đảm bảo file luôn có sẵn trước khi nạp
     initialize_data()

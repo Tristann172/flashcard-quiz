@@ -85,6 +85,29 @@ def test_card_from_dict_invalid_type():
         Card.from_dict(["danh_sach_khong_phai_dict"])
 
 
+def test_card_game_readiness_accepts_valid_single_and_multiple_answers(sample_card):
+    assert sample_card.is_game_ready()
+    sample_card.correct_option_ids = ["B"]
+    assert sample_card.is_game_ready()
+    assert not Card(id="flashcard", question="Q", answer="A").is_game_ready()
+
+
+@pytest.mark.parametrize("changes", [
+    {"quiz_question": ""},
+    {"options": []},
+    {"options": {"A": "not a list"}},
+    {"options": [{"id": key, "text": "Answer"} for key in ["A", "A", "C", "D"]]},
+    {"options": [{"id": [], "text": "Answer"}]},
+    {"options": [{"id": key, "text": " " if key == "A" else "Answer"} for key in "ABCD"]},
+    {"correct_option_ids": []},
+    {"correct_option_ids": ["E"]},
+    {"correct_option_ids": ["A", "A"]},
+])
+def test_card_incomplete_minigame_is_not_ready(sample_card, changes):
+    card = Card.from_dict({**sample_card.to_dict(), **changes})
+    assert not card.is_game_ready()
+
+
 #session
 
 def test_flashcard_session_initial_state():
