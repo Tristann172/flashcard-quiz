@@ -28,7 +28,7 @@ LEVELS = {"Easy": "Dễ", "Medium": "Vừa", "Hard": "Khó"}
 CHOICES = Card.CHOICE_IDS
 SECONDS_PER_QUESTION = 20
 TAB2_STATE = "tab2_controller"
-DATA_ERRORS = (ValueError, TypeError, OSError, storage.StaleCardsError)
+DATA_ERRORS = (ValueError, TypeError, OSError)
 
 
 def styles() -> None:
@@ -101,8 +101,10 @@ class CardManagementView:
 
     STATE_KEY = "tab1_card_management"
 
-    def _load_cards(self) -> tuple[list[dict], str]:
+    def _load_cards(self) -> tuple[list[dict], None]:
         rows, revision = storage.load_cards()
+        if not isinstance(rows, list):
+            raise ValueError("Bộ thẻ phải là một danh sách.")
         cards = []
         for row in rows:
             if not isinstance(row, dict):
@@ -127,7 +129,7 @@ class CardManagementView:
             raise ValueError("Kho thẻ có ID trùng nhau.Hãy sửa ID trong data/cards.json trước khi tiếp tục")
         return cards, revision
 
-    def _save_cards(self, cards: list[dict], revision: str) -> str:
+    def _save_cards(self, cards: list[dict], revision: None) -> None:
         rows = []
         for card in cards:
             game = card.get("minigame") or {}
@@ -456,6 +458,8 @@ class Tab2DataAdapter:
 
     def load_deck(self) -> ReviewDeck:
         rows, _ = storage.load_cards()
+        if not isinstance(rows, list):
+            raise ValueError("Bộ thẻ phải là một danh sách.")
         fingerprint = hashlib.sha256(json.dumps(
             rows, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
         ids = Counter(str(row.get("id", "")).strip()
@@ -485,7 +489,7 @@ class Tab2DataAdapter:
 
     def load_results(self) -> list[dict]:
         rows = storage.load_leaderboard()
-        if any(not isinstance(row, dict) for row in rows):
+        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
             raise ValueError("Bảng xếp hạng chứa bản ghi không hợp lệ")
         for row in rows:
             score = row.get("total_score", 0)
