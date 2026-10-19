@@ -1,8 +1,5 @@
 
 class Card:
-
-    CHOICE_IDS = ("A", "B", "C", "D")
-
     def __init__(self, id, question, answer, category="General",
                  difficulty="Easy", quiz_question="",
                  options=None, correct_option_ids=None):
@@ -51,20 +48,6 @@ class Card:
             options=data.get("options", []),
             correct_option_ids=data.get("correct_option_ids", [])
         )
-
-    def is_game_ready(self) -> bool:
-        if not self.quiz_question or not isinstance(self.options, list):
-            return False
-        choices = set(self.CHOICE_IDS)
-        return (len(self.options) == 4
-                and all(isinstance(option, dict) and isinstance(option.get("id"), str)
-                        for option in self.options)
-                and {option["id"] for option in self.options} == choices
-                and all(isinstance(option.get("text"), str) and option["text"].strip()
-                        for option in self.options)
-                and bool(self.correct_option_ids)
-                and set(self.correct_option_ids) <= choices
-                and len(set(self.correct_option_ids)) == len(self.correct_option_ids))
 
     def is_correct(self, user_answer):
         if isinstance(user_answer, str):

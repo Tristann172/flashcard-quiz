@@ -216,16 +216,19 @@ def load_leaderboard() -> list[dict[str, Any]]:
 def save_leaderboard(leaderboard_data: list[dict[str, Any]]) -> bool:
     """
     Ghi dữ liệu xuống leaderboard.json.
-    Sắp xếp theo tổng điểm giảm dần trước khi lưu, không thêm trường rank.
-    Thứ hạng được tính khi hiển thị trên giao diện.
+    Tự động sắp xếp lại vị trí (rank) theo tổng điểm giảm dần trước khi lưu.
     
     Lưu ý cho Models & UI: Các bản ghi trong `leaderboard_data` 
-    cần đảm bảo có chứa các key như 'player_name', 'total_score', 'elapsed_seconds'
+    cần đảm bảo có chứa các key như 'player_name', 'total_score', 'completion_time' 
     để việc lưu trữ và hiển thị được đầy đủ thông tin.
     """
     # Sắp xếp mảng điểm giảm dần
     leaderboard_data.sort(key=lambda x: x.get('total_score', 0), reverse=True)
     
+    # Đánh lại rank tự động
+    for index, record in enumerate(leaderboard_data):
+        record['rank'] = index + 1
+
     try:
         with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
             json.dump(leaderboard_data, f, ensure_ascii=False, indent=4)
