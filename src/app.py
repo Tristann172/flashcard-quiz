@@ -1,12 +1,16 @@
-"""Entry point for card management and Flashcard review."""
+"""Entry point for card management and the two practice modes."""
 
 import base64
 import hashlib
 import json
+import math
+import random
 import sys
+import time
 from collections import Counter
 from copy import deepcopy
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
@@ -20,6 +24,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from core import storage
 from src.core.manager import FlashcardManager
 from src.models.card import Card
+from src.models.game_session import MinigameSession
 from src.models.session import FlashcardSession
 
 def styles() -> None:
@@ -473,6 +478,8 @@ class CardManagementView:
 
 CATEGORIES = ("OOP", "DSA", "Python")
 LEVELS = {"Easy": "Dễ", "Medium": "Vừa", "Hard": "Khó"}
+CHOICES = ("A", "B", "C", "D")
+SECONDS_PER_QUESTION = 20
 TAB2_STATE = "tab2_controller"
 
 
@@ -486,9 +493,10 @@ class ReviewDeck:
     excluded: int
     issues: list[str]
 
-    def select(self, category: str) -> list[Card]:
+    def select(self, category: str, minigame: bool = False) -> list[Card]:
         return [card for card in self.cards
-                if category == "All" or card.category == category]
+                if (category == "All" or card.category == category)
+                and (not minigame or Tab2DataAdapter.game_ready(card))]
 
 
 class Tab2DataAdapter:
@@ -534,8 +542,43 @@ class Tab2DataAdapter:
                 issues.append(f"Thẻ {index}: {error}")
         return ReviewDeck(cards, extras, fingerprint, excluded, issues)
 
+    @staticmethod
+    def game_ready(card: Card) -> bool:
+        if not card.quiz_question or not isinstance(card.options, list):
+            return False
+        options = card.options
+        return (len(options) == 4
+                and all(isinstance(option, dict) and isinstance(option.get("id"), str)
+                        for option in options)
+                and {option.get("id") for option in options} == set(CHOICES)
+                and all(isinstance(option.get("text"), str) and option["text"].strip()
+                        for option in options)
+                and bool(card.correct_option_ids)
+                and set(card.correct_option_ids) <= set(CHOICES)
+                and len(set(card.correct_option_ids)) == len(card.correct_option_ids))
 
+    def load_results(self) -> list[dict]:
+        self.check_json(storage.LEADERBOARD_FILE)
+        rows = storage.load_leaderboard()
+        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+            raise ValueError("Bảng xếp hạng chứa bản ghi không hợp lệ.")
+        for row in rows:
+            score = row.get("total_score", 0)
+            if isinstance(score, bool) or not isinstance(score, (int, float)) or not math.isfinite(score):
+                raise ValueError("Bảng xếp hạng có điểm số không hợp lệ; chưa ghi thêm kết quả.")
+        return deepcopy(rows)
 
+    def save_result(self, record: dict) -> None:
+        rows = self.load_results()
+        existing = next((row for row in rows if row.get("run_id") == record["run_id"]), None)
+        if existing is not None:
+            if any(existing.get(key) != value for key, value in record.items()):
+                raise ValueError("Mã lượt chơi đã tồn tại với kết quả khác.")
+            return
+        if not storage.save_leaderboard([*rows, deepcopy(record)]):
+            raise OSError("Storage chưa lưu được kết quả. Bạn có thể thử lại.")
+        if not any(row.get("run_id") == record["run_id"] for row in self.load_results()):
+            raise OSError("Chưa xác minh được kết quả đã lưu.")
 
 
 class FlashcardReviewView:
@@ -637,25 +680,324 @@ class FlashcardReviewView:
         st.caption("Xuất sắc ≥90% · Tốt 75–<90% · Khá 50–<75% · Kém <50%")
 
 
+class MinigameView:
+    """UI lifecycle/timer; the existing MinigameSession owns all scoring."""
+
+    def __init__(self, deck: ReviewDeck, cards: list[Card], player: str, category: str,
+                 shuffle: bool, kind: str = "ranked", clock=None):
+        if not cards:
+            raise ValueError("Chưa có câu hỏi để bắt đầu Minigame.")
+        self.cards = deepcopy(cards)
+        self.source_fingerprint = deck.fingerprint
+        self.extras = deepcopy(deck.extras)
+        self.player, self.category, self.kind = player.strip(), category, kind
+        config = {"cards": sorted((card.to_dict() for card in self.cards), key=lambda c: c["id"]),
+                  "seconds": SECONDS_PER_QUESTION, "category": category}
+        self.config_id = hashlib.sha256(json.dumps(config, sort_keys=True,
+                                                  ensure_ascii=False).encode("utf-8")).hexdigest()
+        if shuffle:
+            random.shuffle(self.cards)
+        self.shuffle = shuffle
+        self.stats = MinigameSession()
+        self.run_id = uuid4().hex
+        self.index, self.max_streak = 0, 0
+        self.elapsed = 0.0
+        self.history: list[dict] = []
+        self.saved, self.save_attempted, self.save_error = False, False, ""
+        self.result_record = None
+        self._clock = clock or time.monotonic
+        self.phase = "question"
+        self.started = self._clock()
+        self.deadline = self.started + SECONDS_PER_QUESTION
+
+    @property
+    def question(self) -> Card:
+        return self.cards[self.index]
+
+    @property
+    def time_left(self) -> int:
+        return max(0, math.ceil(self.deadline - self._clock()))
+
+    def _grade(self, selected: list[str], timed_out: bool) -> None:
+        if self.phase != "question":
+            return
+        now = self._clock()
+        remaining = 0 if timed_out else max(0, math.ceil(self.deadline - now))
+        self.phase = "feedback"
+        self.elapsed += min(SECONDS_PER_QUESTION, max(0, now - self.started))
+        correct = not timed_out and self.question.is_correct(selected)
+        self.stats.record_answer(self.question, correct, remaining)
+        self.max_streak = max(self.max_streak, self.stats.streak)
+        self.history.append({"card_id": self.question.id, "selected": list(selected),
+                             "timed_out": timed_out, **self.stats.history[-1]})
+
+    def expire(self) -> bool:
+        if self.phase == "question" and self._clock() >= self.deadline:
+            self._grade([], True)
+            return True
+        return False
+
+    def answer(self, selected: list[str], card_id: str) -> None:
+        if self.phase != "question" or card_id != self.question.id:
+            return
+        if self.expire():
+            return
+        if not selected or not set(selected) <= set(CHOICES):
+            raise ValueError("Hãy chọn đáp án trước khi xác nhận.")
+        self._grade(selected, False)
+
+    def next_question(self) -> None:
+        if self.phase != "feedback":
+            return
+        if self.index + 1 == len(self.cards):
+            self.finish()
+        else:
+            self.index += 1
+            self.phase = "question"
+            self.started = self._clock()
+            self.deadline = self.started + SECONDS_PER_QUESTION
+
+    def finish(self) -> None:
+        if self.phase == "result":
+            return
+        if self.phase == "question" and not self.expire():
+            self.elapsed += min(SECONDS_PER_QUESTION, max(0, self._clock() - self.started))
+        self.phase = "result"
+        seconds = math.ceil(self.elapsed)
+        summary = self.stats.submit()
+        self.result_record = {**summary, "model_session_id": summary["session_id"],
+                              "session_id": self.run_id, "run_id": self.run_id,
+                              "player_name": self.player, "category": self.category,
+                              "total_questions": len(self.cards),
+                              "answered_count": self.stats.total_questions,
+                              "elapsed_seconds": round(self.elapsed, 6),
+                              "completion_time": f"{seconds // 60:02}:{seconds % 60:02}",
+                              "max_streak": self.max_streak, "config_id": self.config_id,
+                              "kind": self.kind, "seconds_per_question": SECONDS_PER_QUESTION,
+                              "question_ids": [card.id for card in self.cards],
+                              "played_at": datetime.now(timezone.utc).isoformat()}
+
+    def retry(self, unanswered: bool = False):
+        attempted = {item["card_id"] for item in self.history}
+        wrong = {item["card_id"] for item in self.history if not item["is_correct"]}
+        cards = [card for card in self.cards
+                 if (card.id not in attempted if unanswered else card.id in wrong)]
+        if not cards:
+            return None
+        deck = ReviewDeck(self.cards, self.extras, self.source_fingerprint, 0, [])
+        return MinigameView(deck, cards, self.player, self.category, self.shuffle,
+                            "practice_unanswered" if unanswered else "practice_wrong")
+
+    def render_question(self) -> None:
+        if self.expire():
+            st.rerun()
+        timer, score, streak, combo = st.columns(4)
+        timer.metric("⏳ Còn lại", f"{self.time_left} giây")
+        score.metric("Điểm", self.stats.total_score)
+        streak.metric("Chuỗi đúng", self.stats.streak)
+        combo.metric("Combo", f"×{self.stats.multiplier:g}")
+        st.progress(self.index / len(self.cards), text=f"Câu {self.index + 1}/{len(self.cards)}")
+        if self.time_left <= 5:
+            st.warning("Sắp hết giờ! Hãy xác nhận câu trả lời.")
+        card = self.question
+        with st.container(border=True):
+            st.caption(f"{card.category} · {LEVELS[card.difficulty]} · {card.get_base_points()} điểm cơ bản")
+            st.markdown("#### Câu hỏi")
+            st.write(card.quiz_question)
+            options = {option["id"]: option["text"] for option in card.options}
+            prefix = f"tab2_choice_{self.run_id}_{self.index}"
+            if len(card.correct_option_ids) == 1:
+                choice = st.radio("Chọn một đáp án", CHOICES, index=None,
+                                  format_func=lambda key: f"{key}. {options[key]}", key=prefix)
+                selected = [choice] if choice is not None else []
+            else:
+                st.caption("Chọn tất cả đáp án đúng.")
+                selected = [key for key in CHOICES
+                            if st.checkbox(f"{key}. {options[key]}", key=f"{prefix}_{key}")]
+            if st.button("✓ Xác nhận câu trả lời", key=f"tab2_answer_{self.run_id}_{self.index}",
+                         type="primary", width="stretch"):
+                try:
+                    self.answer(selected, card.id)
+                except ValueError as error:
+                    st.warning(str(error))
+                else:
+                    st.rerun()
+        if st.button("🏁 Nộp bài", key="tab2_submit"):
+            self.finish()
+            st.rerun()
+        st.caption("Chuyển tab không dừng đồng hồ. Nộp bài không chấm lựa chọn chưa xác nhận.")
+
+    def render_feedback(self) -> None:
+        item = self.history[-1]
+        if item["timed_out"]:
+            st.warning("Hết giờ · 0 điểm · Chuỗi đúng đã đặt lại.")
+        elif item["is_correct"]:
+            st.success(f"Chính xác! +{item['points_gained']} điểm · Combo ×{item['multiplier']:g}")
+        else:
+            st.error("Chưa chính xác · 0 điểm · Chuỗi đúng đã đặt lại.")
+        st.write(self.question.quiz_question)
+        for option in sorted(self.question.options, key=lambda value: value["id"]):
+            correct = option["id"] in self.question.correct_option_ids
+            chosen = option["id"] in item["selected"]
+            st.write(f"{'✅' if correct else '▫️'} {option['id']}. {option['text']}"
+                     + (" — Bạn chọn" if chosen else ""))
+        explanation = self.extras.get(self.question.id, {}).get("explanation")
+        if explanation:
+            st.info(explanation)
+        st.write(f"Tổng điểm: **{self.stats.total_score}** · Chuỗi cao nhất: **{self.max_streak}**")
+        st.caption("Đồng hồ câu tiếp theo bắt đầu khi bạn bấm Tiếp tục.")
+        if st.button("Xem kết quả" if self.index + 1 == len(self.cards) else "Tiếp tục →",
+                     key="tab2_next", type="primary", width="stretch"):
+            self.next_question()
+            st.rerun()
+        if st.button("🏁 Nộp bài", key="tab2_submit_feedback"):
+            self.finish()
+            st.rerun()
+
+    def render_result(self, adapter: Tab2DataAdapter) -> None:
+        if not self.save_attempted:
+            self.save_attempted = True
+            try:
+                adapter.save_result(self.result_record)
+            except (OSError, ValueError, TypeError) as error:
+                self.save_error = str(error)
+            else:
+                self.saved, self.save_error = True, ""
+        st.markdown("### 🏁 Kết quả Minigame" if self.kind == "ranked" else "### 📖 Kết quả luyện tập")
+        st.write("Người chơi:", self.player)
+        score, correct, streak, duration = st.columns(4)
+        score.metric("Tổng điểm", self.stats.total_score)
+        correct.metric("Đúng / Tổng", f"{self.stats.correct_count}/{len(self.cards)}")
+        streak.metric("Chuỗi cao nhất", self.max_streak)
+        duration.metric("Thời gian làm bài", f"{self.elapsed:.1f}s")
+        unanswered = len(self.cards) - len(self.history)
+        timed_out = sum(item["timed_out"] for item in self.history)
+        wrong = sum(not item["is_correct"] for item in self.history)
+        st.caption(f"{wrong - timed_out} câu sai · {timed_out} câu hết giờ · {unanswered} câu chưa trả lời. "
+                   "Thời gian không tính lúc đọc phản hồi.")
+        if self.saved:
+            st.success("Đã lưu kết quả." if self.kind == "ranked" else "Đã lưu lượt luyện tập, tách khỏi bảng thi chính.")
+        else:
+            st.error("Chưa lưu được kết quả: " + self.save_error)
+            if st.button("Thử lưu lại", key="tab2_retry_save"):
+                self.save_attempted = False
+                st.rerun()
+            st.caption("Kết quả vẫn được giữ tại đây. Lưu thành công trước khi bắt đầu lượt khác.")
+        with st.expander("Xem lại câu hỏi và đáp án"):
+            answers = {item["card_id"]: item for item in self.history}
+            for card in self.cards:
+                item = answers.get(card.id)
+                status = ("Chưa trả lời" if item is None else "Hết giờ" if item["timed_out"]
+                          else "Đúng" if item["is_correct"] else "Sai")
+                st.write(card.quiz_question)
+                st.caption(status)
+                if item:
+                    st.write("Bạn chọn: " + (", ".join(item["selected"]) or "Không chọn"))
+                labels = {option["id"]: option["text"] for option in card.options}
+                st.write("Đáp án: " + "; ".join(f"{key}. {labels[key]}" for key in card.correct_option_ids))
+        if st.button(f"↻ Luyện lại câu sai / hết giờ ({wrong})", key="tab2_retry_wrong",
+                     disabled=wrong == 0 or not self.saved, type="primary", width="stretch"):
+            st.session_state[TAB2_STATE].active = self.retry()
+            st.rerun()
+        if unanswered and st.button(f"Ôn các câu chưa trả lời ({unanswered})", key="tab2_retry_unanswered",
+                                    disabled=not self.saved, width="stretch"):
+            st.session_state[TAB2_STATE].active = self.retry(unanswered=True)
+            st.rerun()
+        if not wrong:
+            st.caption("Không có câu sai hoặc hết giờ để luyện lại.")
+        if st.button("Về màn hình chờ", key="tab2_result_lobby", disabled=not self.saved):
+            st.session_state[TAB2_STATE].reset()
+            st.rerun()
+        if not self.saved:
+            discard = st.checkbox("Rời kết quả mà không lưu", key="tab2_discard")
+            if discard and st.button("Xác nhận về màn hình chờ", key="tab2_discard_confirm"):
+                st.session_state[TAB2_STATE].reset()
+                st.rerun()
+        if self.kind == "ranked":
+            LeaderboardView(adapter).render(self.config_id)
 
 
+class LeaderboardView:
+    """Rank copies for display; Storage's persisted ranks stay untouched."""
+
+    def __init__(self, adapter: Tab2DataAdapter):
+        self.adapter = adapter
+
+    @staticmethod
+    def duration(row: dict) -> float:
+        value = row.get("elapsed_seconds")
+        if isinstance(value, (float, int)) and not isinstance(value, bool) and math.isfinite(value) and value >= 0:
+            return float(value)
+        try:
+            minutes, seconds = str(row["completion_time"]).split(":")
+            if minutes.isdigit() and seconds.isdigit() and int(seconds) < 60:
+                return int(minutes) * 60 + int(seconds)
+        except (KeyError, ValueError):
+            pass
+        return math.inf
+
+    @classmethod
+    def ranked(cls, rows: list[dict]) -> list[dict]:
+        return sorted(deepcopy(rows), key=lambda row: (-row.get("total_score", 0), cls.duration(row),
+                                                       str(row.get("played_at", "")), str(row.get("run_id", ""))))
+
+    @classmethod
+    def table(cls, rows: list[dict]) -> None:
+        st.dataframe([{"Hạng": index, "Người chơi": str(row.get("player_name", "")),
+                       "Điểm": row.get("total_score", 0),
+                       "Thời gian": (f"{cls.duration(row):.1f}s" if math.isfinite(cls.duration(row)) else "Chưa rõ")}
+                      for index, row in enumerate(cls.ranked(rows), 1)], hide_index=True, width="stretch")
+
+    def render(self, config_id: str | None = None) -> None:
+        st.markdown("### 🏆 Bảng xếp hạng")
+        st.caption("Cùng bộ câu và thời gian: điểm cao xếp trước; bằng điểm ưu tiên thời gian ngắn hơn.")
+        try:
+            rows = self.adapter.load_results()
+        except (OSError, ValueError, TypeError) as error:
+            st.error(f"Không thể đọc bảng xếp hạng: {error}")
+            return
+        competitive = [row for row in rows if row.get("kind") == "ranked" and row.get("config_id")]
+        if config_id is None and competitive:
+            groups = {}
+            for row in sorted(competitive, key=lambda item: str(item.get("played_at", "")), reverse=True):
+                groups.setdefault(row["config_id"], row)
+            def label(key):
+                row = groups[key]
+                category = "Tất cả chủ đề" if row.get("category") == "All" else row.get("category", "")
+                return f"{category} · {row.get('total_questions', 0)} câu · {row.get('played_at', '')[:10]}"
+            config_id = st.selectbox("Bộ câu thi", list(groups), format_func=label, key="tab2_board_group")
+        visible = [row for row in competitive if row["config_id"] == config_id]
+        if visible:
+            self.table(visible)
+        else:
+            st.info("Chưa có kết quả thi chính cho bộ câu này.")
+        legacy = [row for row in rows if not row.get("config_id")]
+        if legacy:
+            with st.expander("Lịch sử cũ · chưa có thông tin bộ câu"):
+                st.caption("Các lượt này không được xếp chung với bộ câu thi mới.")
+                self.table(legacy)
 
 
+@st.fragment(run_every=1)
+def render_minigame_question() -> None:
+    """Only the timed question refreshes; never rerun Tab 1 on every tick."""
+    controller = st.session_state.get(TAB2_STATE)
+    game = controller.active if controller else None
+    if game is not None and game.phase == "question":
+        game.render_question()
 
 
 class ReviewTabView:
-    """Quiz-only first increment, composed with the existing backend."""
-
     def __init__(self):
         self.adapter = Tab2DataAdapter()
         self.active = None
 
     def reset(self) -> None:
-        if self.active is not None:
+        if self.active is not None and hasattr(self.active, "cancel"):
             self.active.cancel()
         self.active = None
         for key in list(st.session_state):
-            if key.startswith(("tab2_flip_", "tab2_yes_", "tab2_no_")):
+            if key.startswith(("tab2_choice_", "tab2_flip_", "tab2_yes_", "tab2_no_", "tab2_answer_")) or key == "tab2_discard":
                 del st.session_state[key]
 
     @staticmethod
@@ -676,25 +1018,51 @@ class ReviewTabView:
         .tab2-good { background: #dbeafe; color: #1e40af; }
         .tab2-fair { background: #fef3c7; color: #854d0e; }
         .tab2-poor { background: #ffe4e6; color: #9f1239; }
+        .tab2-landscape { height: 88px; border-radius: 14px; overflow: hidden; position: relative;
+          background: linear-gradient(#9ddcff, #e8f8ff); margin-bottom: 18px; }
+        .tab2-landscape:before { content: ''; position: absolute; width: 45%; height: 95px;
+          background: #8bcda6; border-radius: 50%; bottom: -50px; left: -3%; box-shadow: 250px 0 #68b690; }
+        .tab2-landscape:after { content: '☁  ☁'; position: absolute; top: 0; left: 12%; color: white;
+          font-size: 44px; letter-spacing: 45px; }
         </style>
         """, unsafe_allow_html=True)
-
 
     def render_lobby(self, deck: ReviewDeck) -> None:
         with st.container(border=True, key="tab2_lobby"):
             st.markdown("### 🎯 Bắt đầu phiên ôn tập")
             st.write("Lật thẻ, tự đánh giá mức độ ghi nhớ và học lại những câu chưa nhớ.")
+            mode = st.radio("Chọn chế độ", ["Flashcard", "Minigame"], horizontal=True, key="tab2_mode")
             category = st.selectbox("Chủ đề ôn tập", ["All", *CATEGORIES], key="tab2_category",
                                     format_func=lambda value: "Tất cả chủ đề" if value == "All" else value)
             shuffle = st.checkbox("Xáo trộn thứ tự câu hỏi", value=True, key="tab2_shuffle")
-            cards = deck.select(category)
-            st.caption("Tắt xáo trộn: học theo độ khó Dễ → Vừa → Khó.")
-            st.caption(f"{len(cards)} thẻ sẵn sàng · Không giới hạn thời gian")
+            cards = deck.select(category, minigame=mode == "Minigame")
+            if mode == "Flashcard":
+                st.caption("Tắt xáo trộn: học theo độ khó Dễ → Vừa → Khó.")
+                st.caption(f"{len(cards)} thẻ sẵn sàng · Không giới hạn thời gian")
+                player, count = "", len(cards)
+            else:
+                player = st.text_input("Tên người chơi", max_chars=40, key="tab2_player",
+                                       placeholder="Nhập tên của bạn")
+                count = 0
+                if cards:
+                    count = st.selectbox("Số câu", list(range(1, len(cards) + 1)),
+                                         index=min(5, len(cards)) - 1, key=f"tab2_count_{category}_{len(cards)}")
+                st.caption(f"{len(cards)} câu hợp lệ · {SECONDS_PER_QUESTION} giây/câu · A–D cố định")
+                missing = len(deck.select(category)) - len(cards)
+                if missing:
+                    st.caption(f"{missing} thẻ chưa có đủ nội dung Minigame; có thể bổ sung ở Tab 1.")
+                with st.expander("Luật chơi"):
+                    st.write("Dễ 10 · Vừa 20 · Khó 30 điểm. Chuỗi 1–2 câu ×1; 3–4 câu ×1.5; từ 5 câu ×2.")
+                    st.write("Điểm = phần nguyên của (điểm cơ bản × combo) + số giây còn lại, thưởng tối đa 10.")
+                    st.write("Chọn đủ đáp án đúng, không chọn thừa. Sai hoặc hết giờ: 0 điểm, mất chuỗi; mỗi câu chấm một lần.")
+                    st.write("Nộp sớm giữ điểm đã xác nhận. Luyện lại câu sai tạo lượt luyện mới, tách khỏi bảng thi chính.")
             if not cards:
                 st.info("Chưa có câu phù hợp. Hãy bổ sung thẻ thuộc OOP, DSA hoặc Python ở Tab 1.")
-            if st.button("🚀 Bắt đầu ôn tập", key="tab2_start", type="primary",
-                         width="stretch", disabled=not cards):
-                self.active = FlashcardReviewView(deck, cards, shuffle)
+            if st.button("🚀 Bắt đầu ôn tập" if mode == "Flashcard" else "🚀 Bắt đầu Minigame",
+                         key="tab2_start", type="primary", width="stretch",
+                         disabled=not cards or (mode == "Minigame" and not player.strip())):
+                self.active = (FlashcardReviewView(deck, cards, shuffle) if mode == "Flashcard" else
+                               MinigameView(deck, cards[:count], player, category, shuffle))
                 st.rerun()
         if deck.excluded:
             st.caption(f"Tab 2 chỉ học OOP, DSA và Python; {deck.excluded} thẻ ngoài phạm vi được giữ nguyên trong kho.")
@@ -703,11 +1071,13 @@ class ReviewTabView:
                 for issue in deck.issues:
                     st.write(issue)
         st.caption("Dữ liệu lấy từ kho thẻ Tab 1 đã lưu. Phiên đang học giữ nguyên bộ thẻ khi bắt đầu.")
+        with st.expander("🏆 Xem bảng xếp hạng"):
+            LeaderboardView(self.adapter).render()
 
     def render(self) -> None:
         self.styles()
         with st.container(key="tab2"):
-            st.subheader("Quiz · Ôn tập Flashcard")
+            st.subheader("Ôn tập & Minigame")
             try:
                 deck = self.adapter.load_deck()
             except (OSError, ValueError, TypeError) as error:
@@ -720,14 +1090,25 @@ class ReviewTabView:
                     return
                 if self.active.source_fingerprint != deck.fingerprint:
                     st.info("Bộ thẻ đã thay đổi. Phiên này giữ bộ thẻ cũ; về màn hình chờ để học dữ liệu mới.")
-            self.active.render()
+            if hasattr(self.active, "manager"):
+                self.active.render()
+            else:
+                st.markdown('<div class="tab2-landscape" aria-hidden="true"></div>', unsafe_allow_html=True)
+                if self.active.kind != "ranked":
+                    st.caption("📖 Lượt luyện tập mới · Không tính vào bảng thi chính")
+                if self.active.phase == "question":
+                    render_minigame_question()
+                elif self.active.phase == "feedback":
+                    self.active.render_feedback()
+                else:
+                    self.active.render_result(self.adapter)
 
 
 def main() -> None:
     st.set_page_config(page_title="Flashcard Quiz Engine", layout="wide")
     styles()
     st.title("📚 Flashcard Quiz Engine")
-    manager_tab, quiz_tab = st.tabs(["Manager", "Quiz"])
+    manager_tab, quiz_tab = st.tabs(["Manager", "Ôn tập & Minigame"])
     with manager_tab:
         CardManagementView().render()
     with quiz_tab:
