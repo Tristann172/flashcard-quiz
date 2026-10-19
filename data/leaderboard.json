@@ -1,5 +1,16 @@
 [
     {
+        "run_id": "0d4cc2849f11482886564695fbb3fd7b",
+        "player_name": "Trí",
+        "category": "All",
+        "total_score": 168,
+        "total_questions": 5,
+        "correct_count": 5,
+        "accuracy_percentage": 100.0,
+        "elapsed_seconds": 51.172,
+        "played_at": "2026-10-19T15:29:47.431537+00:00"
+    },
+    {
         "run_id": "e63bf03907fc4d45988b99fbc05a86ae",
         "player_name": "Đạt",
         "category": "All",
