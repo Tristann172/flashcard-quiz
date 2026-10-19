@@ -1,162 +1,902 @@
 [
-    {
-        "id": "c1",
-        "question": "Tính bao đóng (Encapsulation) trong OOP là gì?",
-        "answer": "Là cơ chế che giấu dữ liệu bên trong lớp và chỉ cho phép truy xuất qua các phương thức (getter/setter).",
-        "category": "OOP",
-        "difficulty": "Easy",
-        "quiz_question": "Mục đích chính của tính bao đóng trong OOP là gì?",
-        "options": [
-            {"id": "A", "text": "Che giấu trạng thái nội tại của đối tượng"},
-            {"id": "B", "text": "Kế thừa các thuộc tính từ lớp cha"},
-            {"id": "C", "text": "Nạp chồng phương thức"},
-            {"id": "D", "text": "Bảo vệ dữ liệu khỏi việc sửa đổi tùy tiện từ bên ngoài"}
-        ],
-        "correct_option_ids": ["A", "D"]
-    },
-    {
-        "id": "c2",
-        "question": "Độ phức tạp thời gian khi tra cứu một khóa (key) trong Hash Map (dict) của Python là bao nhiêu?",
-        "answer": "Thời gian trung bình là O(1) nhờ cơ chế băm (hashing).",
-        "category": "Python",
-        "difficulty": "Easy",
-        "quiz_question": "Cấu trúc dữ liệu nào trong Python cung cấp thời gian tra cứu trung bình là O(1)?",
-        "options": [
-            {"id": "A", "text": "List"},
-            {"id": "B", "text": "Dictionary (Dict)"},
-            {"id": "C", "text": "Tuple"},
-            {"id": "D", "text": "Set"}
-        ],
-        "correct_option_ids": ["B", "D"]
-    },
-    {
-        "id": "c3",
-        "question": "deque dùng làm hàng đợi như thế nào?",
-        "answer": "append ở cuối, popleft ở đầu.",
-        "category": "DSA",
-        "difficulty": "Medium",
-        "quiz_question": "Chọn thao tác để ôn thẻ theo chuẩn FIFO bằng deque.",
-        "options": [
-            {"id": "A", "text": "popleft() lấy phần tử đầu"},
-            {"id": "B", "text": "pop() lấy phần tử cuối"},
-            {"id": "C", "text": "append() thêm vào cuối"},
-            {"id": "D", "text": "insert() chèn vào giữa"}
-        ],
-        "correct_option_ids": ["A", "C"]
-    },
-    {
-        "id": "c4",
-        "question": "Stack (Ngăn xếp) hoạt động theo nguyên tắc nào?",
-        "answer": "LIFO (Last-In, First-Out) - Vào sau ra trước.",
-        "category": "DSA",
-        "difficulty": "Easy",
-        "quiz_question": "Khi áp dụng Stack cho tính năng Undo (Hoàn tác), phần tử nào sẽ được lấy ra đầu tiên?",
-        "options": [
-            {"id": "A", "text": "Phần tử được thêm vào đầu tiên"},
-            {"id": "B", "text": "Phần tử được thêm vào cuối cùng (gần nhất)"},
-            {"id": "C", "text": "Phần tử ở giữa"},
-            {"id": "D", "text": "Phần tử có giá trị lớn nhất"}
-        ],
-        "correct_option_ids": ["B"]
-    },
-    {
-        "id": "c5",
-        "question": "Sự khác biệt chính giữa List và Tuple trong Python là gì?",
-        "answer": "List có thể thay đổi (mutable), còn Tuple thì không thể thay đổi (immutable) sau khi khởi tạo.",
-        "category": "Python",
-        "difficulty": "Medium",
-        "quiz_question": "Đặc điểm nào dưới đây đúng với Tuple trong Python?",
-        "options": [
-            {"id": "A", "text": "Có thể thêm phần tử bằng hàm append()"},
-            {"id": "B", "text": "Không thể thay đổi nội dung (immutable)"},
-            {"id": "C", "text": "Dùng ngoặc vuông [] để khởi tạo"},
-            {"id": "D", "text": "Thường dùng làm Key trong Dictionary"}
-        ],
-        "correct_option_ids": ["B", "D"]
-    },
-    {
-        "id": "c6",
-        "question": "Tính đa hình (Polymorphism) là gì?",
-        "answer": "Là khả năng các đối tượng thuộc các lớp khác nhau có thể phản hồi cùng một lời gọi phương thức theo những cách riêng biệt.",
-        "category": "OOP",
-        "difficulty": "Hard",
-        "quiz_question": "Tính đa hình trong Python thường được thể hiện qua khái niệm nào?",
-        "options": [
-            {"id": "A", "text": "Duck typing (phương thức giống nhau thì coi là giống nhau)"},
-            {"id": "B", "text": "Overriding (Ghi đè phương thức)"},
-            {"id": "C", "text": "Private attributes (Thuộc tính riêng tư)"},
-            {"id": "D", "text": "Constructors (Hàm khởi tạo)"}
-        ],
-        "correct_option_ids": ["A", "B"]
-    },
-    {
-        "id": "c7",
-        "question": "Tại sao lại dùng Queue cho tính năng ôn tập Flashcard thay vì Stack?",
-        "answer": "Queue giúp các thẻ xếp hàng theo thứ tự (FIFO), đảm bảo thẻ nào tới lượt trước sẽ được học trước.",
-        "category": "DSA",
-        "difficulty": "Medium",
-        "quiz_question": "Cấu trúc dữ liệu nào phù hợp nhất để xây dựng một hàng đợi (Queue) xử lý tác vụ tuần tự?",
-        "options": [
-            {"id": "A", "text": "Hash Map"},
-            {"id": "B", "text": "Ngăn xếp (Stack)"},
-            {"id": "C", "text": "collections.deque"},
-            {"id": "D", "text": "Mảng 2 chiều (2D Array)"}
-        ],
-        "correct_option_ids": ["C"]
-    },
-    {
-        "id": "c8",
-        "question": "Khối try...except trong Python dùng để làm gì?",
-        "answer": "Dùng để bắt và xử lý các ngoại lệ (exceptions) có thể xảy ra trong lúc chạy chương trình, giúp app không bị crash.",
-        "category": "Python",
-        "difficulty": "Easy",
-        "quiz_question": "Từ khóa nào được sử dụng để định nghĩa khối mã luôn luôn được thực thi bất kể có ngoại lệ hay không?",
-        "options": [
-            {"id": "A", "text": "catch"},
-            {"id": "B", "text": "finally"},
-            {"id": "C", "text": "else"},
-            {"id": "D", "text": "continue"}
-        ],
-        "correct_option_ids": ["B"]
-    },
-    {
-        "id": "c9",
-        "question": "Phương pháp Active Recall trong học tập là gì?",
-        "answer": "Là phương pháp chủ động nhớ lại thông tin từ não bộ thay vì đọc thụ động, giúp củng cố liên kết thần kinh mạnh mẽ hơn.",
-        "category": "Methodology",
-        "difficulty": "Easy",
-        "quiz_question": "Đâu là một ví dụ của việc áp dụng Active Recall?",
-        "options": [
-            {"id": "A", "text": "Đọc đi đọc lại cuốn sách giáo khoa nhiều lần"},
-            {"id": "B", "text": "Tự làm bài kiểm tra trắc nghiệm không nhìn tài liệu"},
-            {"id": "C", "text": "Dùng Flashcard lật mặt trước và tự nhẩm mặt sau"},
-            {"id": "D", "text": "Highlight (bôi màu) các dòng chữ quan trọng"}
-        ],
-        "correct_option_ids": ["B", "C"]
-    },
-    {
-        "id": "c10",
-        "question": "Git Flow thường chia ra các nhánh (branch) cơ bản nào?",
-        "answer": "Thường có nhánh main (production), nhánh develop, và các nhánh tính năng (feature branches).",
-        "category": "Tools",
-        "difficulty": "Medium",
-        "quiz_question": "Lệnh nào sau đây dùng để tạo và chuyển sang một nhánh tính năng mới trong Git?",
-        "options": [
-            {"id": "A", "text": "git branch feat/new"},
-            {"id": "B", "text": "git checkout -b feat/new"},
-            {"id": "C", "text": "git switch -c feat/new"},
-            {"id": "D", "text": "git merge feat/new"}
-        ],
-        "correct_option_ids": ["B", "C"]
-    },
-    {
-        "id": "c11",
-        "question": "Streamlit là gì và điểm mạnh lớn nhất của nó là gì?",
-        "answer": "Streamlit là một thư viện Python mã nguồn mở, cho phép lập trình viên xây dựng các ứng dụng web tương tác một cách nhanh chóng chỉ bằng mã Python thuần túy mà không cần biết HTML, CSS hay JavaScript.",
-        "category": "Streamlit",
-        "difficulty": "Easy",
-        "quiz_question": "",
-        "options": [],
-        "correct_option_ids": []
-    }
+  {
+    "id": "c1",
+    "question": "Tên gọi của ngôn ngữ Python được lấy cảm hứng từ đâu?",
+    "answer": "Tên gọi Python được lấy cảm hứng từ chương trình hài kịch truyền hình của đài BBC mà tác giả Guido yêu thích mang tên 'Monty Python's Flying Circus'.[cite: 3]",
+    "category": "Python",
+    "difficulty": "Easy",
+    "quiz_question": "Tên gọi Python bắt nguồn từ đâu?",
+    "options": [
+      {"id": "A", "text": "Một loài trăn Nam Mỹ"},
+      {"id": "B", "text": "Một chương trình hài kịch truyền hình"},
+      {"id": "C", "text": "Một thuật toán nén dữ liệu"},
+      {"id": "D", "text": "Tên một nhà khoa học người Hà Lan"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c2",
+    "question": "Triết lý cốt lõi của Python (The Zen of Python - PEP 20) ưu tiên điều gì?",
+    "answer": "Ưu tiên tính rõ ràng, mạch lạc và khả năng đọc hiểu của mã nguồn nhằm tối ưu hóa thời gian phát triển của con người.[cite: 3]",
+    "category": "Python",
+    "difficulty": "Easy",
+    "quiz_question": "Triết lý The Zen of Python (PEP 20) nhấn mạnh vào việc tối ưu hóa yếu tố nào?",
+    "options": [
+      {"id": "A", "text": "Tốc độ xử lý của vi xử lý"},
+      {"id": "B", "text": "Khả năng quản lý bộ nhớ thủ công"},
+      {"id": "C", "text": "Tính rõ ràng và thời gian phát triển của lập trình viên"},
+      {"id": "D", "text": "Khả năng phát hiện lỗi kiểu dữ liệu sớm lúc biên dịch"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c3",
+    "question": "Hệ thống kiểu dữ liệu của Python khác biệt thế nào so với ngôn ngữ C và Java?",
+    "answer": "Python sử dụng hệ thống kiểu động (Dynamic typing), trong khi C và Java sử dụng kiểu tĩnh (Static typing).[cite: 5]",
+    "category": "Python",
+    "difficulty": "Medium",
+    "quiz_question": "Chọn phát biểu ĐÚNG về hệ thống kiểu dữ liệu trong Python, C và Java.",
+    "options": [
+      {"id": "A", "text": "Cả Python và Java đều sử dụng kiểu động"},
+      {"id": "B", "text": "Python dùng kiểu động, còn C và Java dùng kiểu tĩnh"},
+      {"id": "C", "text": "C dùng kiểu động, Python và Java dùng kiểu tĩnh"},
+      {"id": "D", "text": "Cả ba ngôn ngữ đều dùng kiểu tĩnh"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c4",
+    "question": "Mô hình thực thi hai pha (Two-phase execution model) của Python gồm những pha nào?",
+    "answer": "Bao gồm: Pha biên dịch (chuyển mã nguồn sang Bytecode lưu tại thư mục __pycache__) và Pha thực thi (nạp Bytecode vào máy ảo PVM để xử lý).[cite: 7]",
+    "category": "Python",
+    "difficulty": "Medium",
+    "quiz_question": "Python thông dịch mã nguồn như thế nào?",
+    "options": [
+      {"id": "A", "text": "Dịch trực tiếp từng dòng mã thành mã máy"},
+      {"id": "B", "text": "Biên dịch toàn bộ thành mã nhị phân trước khi chạy"},
+      {"id": "C", "text": "Dịch toàn bộ sang mã C rồi mới chạy"},
+      {"id": "D", "text": "Dịch sang Bytecode rồi chạy trên Python Virtual Machine (PVM)"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c5",
+    "question": "Kiểu dữ liệu số nguyên (int) trong Python có bị giới hạn dung lượng như C hay Java không?",
+    "answer": "Không, số int trong Python có độ chính xác tùy ý (arbitrary precision) nên không bị giới hạn 32/64 bit và không bao giờ bị tràn (overflow).[cite: 11, 12]",
+    "category": "Python",
+    "difficulty": "Easy",
+    "quiz_question": "Đặc điểm của kiểu dữ liệu số nguyên (int) trong Python là gì?",
+    "options": [
+      {"id": "A", "text": "Giới hạn ở kích thước 32 bit"},
+      {"id": "B", "text": "Giới hạn ở kích thước 64 bit"},
+      {"id": "C", "text": "Có độ chính xác tùy ý, không bao giờ bị tràn (overflow)"},
+      {"id": "D", "text": "Chỉ có thể lưu số nguyên dương"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c6",
+    "question": "Toán tử Walrus (:=) trong Python có chức năng gì?",
+    "answer": "Toán tử := vừa gán giá trị cho một biến, vừa trả về giá trị đó ngay trong biểu thức hiện tại.[cite: 13]",
+    "category": "Python",
+    "difficulty": "Medium",
+    "quiz_question": "Công dụng của Walrus Operator (:=) ra mắt từ bản Python 3.8 là gì?",
+    "options": [
+      {"id": "A", "text": "Khai báo kiểu dữ liệu hằng số"},
+      {"id": "B", "text": "So sánh giá trị và định danh"},
+      {"id": "C", "text": "Vừa gán giá trị, vừa trả về giá trị trong cùng một biểu thức"},
+      {"id": "D", "text": "Đảo ngược danh sách (list) tại chỗ"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c7",
+    "question": "Sự khác biệt giữa toán tử đồng nhất (is) và toán tử so sánh (==) là gì?",
+    "answer": "Toán tử == dùng để so sánh giá trị bằng nhau, trong khi toán tử is dùng để kiểm tra xem hai đối tượng có chung địa chỉ ô nhớ hay không.[cite: 14]",
+    "category": "Python",
+    "difficulty": "Medium",
+    "quiz_question": "Toán tử 'is' trong Python dùng để làm gì?",
+    "options": [
+      {"id": "A", "text": "Kiểm tra hai biến có giá trị giống nhau"},
+      {"id": "B", "text": "Kiểm tra hai biến có trỏ đến cùng một ô nhớ (định danh) không"},
+      {"id": "C", "text": "Kiểm tra một phần tử có nằm trong danh sách không"},
+      {"id": "D", "text": "Ép kiểu dữ liệu tĩnh cho biến"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c8",
+    "question": "Những giá trị nào được Python coi là Falsy (tương đương với False)?",
+    "answer": "Các giá trị Falsy bao gồm: False, None, 0, 0.0, 0j, chuỗi rỗng '', và các tập hợp rỗng như [], (), {}, set(), range(0).[cite: 11]",
+    "category": "Python",
+    "difficulty": "Easy",
+    "quiz_question": "Các giá trị nào sau đây được Python đánh giá là Falsy?",
+    "options": [
+      {"id": "A", "text": "None, [] và 0"},
+      {"id": "B", "text": "Chuỗi '0', [] và 0"},
+      {"id": "C", "text": "True, [0] và ' '"},
+      {"id": "D", "text": "False, [False] và 0.0"}
+    ],
+    "correct_option_ids": ["A"]
+  },
+  {
+    "id": "c9",
+    "question": "Sự khác biệt giữa phép toán chia (/) và chia lấy nguyên (//) trong Python?",
+    "answer": "Phép (/) là chia thực và trả về kiểu float, trong khi (//) là chia lấy nguyên trả về kiểu int và luôn làm tròn xuống.[cite: 12]",
+    "category": "Python",
+    "difficulty": "Easy",
+    "quiz_question": "Kết quả của phép tính 7 // 2 trong Python là bao nhiêu?",
+    "options": [
+      {"id": "A", "text": "3.5"},
+      {"id": "B", "text": "4"},
+      {"id": "C", "text": "3"},
+      {"id": "D", "text": "1"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c10",
+    "question": "Trong các kiểu tập hợp của Python, những kiểu nào là Mutable (có thể thay đổi)?",
+    "answer": "Các kiểu dữ liệu Mutable bao gồm: list (danh sách), dict (từ điển), set (tập hợp) và bytearray.[cite: 10]",
+    "category": "Python",
+    "difficulty": "Medium",
+    "quiz_question": "Các cấu trúc dữ liệu nào dưới đây thuộc nhóm Mutable (có thể thay đổi tại chỗ)?",
+    "options": [
+      {"id": "A", "text": "list và dict"},
+      {"id": "B", "text": "tuple và string"},
+      {"id": "C", "text": "set và frozenset"},
+      {"id": "D", "text": "list và set"}
+    ],
+    "correct_option_ids": ["A", "D"]
+  },
+  {
+    "id": "c11",
+    "question": "Tham số *args và **kwargs trong hàm Python dùng để làm gì?",
+    "answer": "*args dùng để thu thập các đối số vị trí thừa thành Tuple, còn **kwargs thu thập các đối số khóa thừa thành kiểu Dict.[cite: 17]",
+    "category": "Python",
+    "difficulty": "Medium",
+    "quiz_question": "Cú pháp **kwargs trong định nghĩa hàm sẽ thu thập các đối số khóa (keyword arguments) thừa thành kiểu dữ liệu nào?",
+    "options": [
+      {"id": "A", "text": "List"},
+      {"id": "B", "text": "Set"},
+      {"id": "C", "text": "Tuple"},
+      {"id": "D", "text": "Dict"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c12",
+    "question": "Bẫy 'Mutable Default Argument' trong khởi tạo hàm là gì?",
+    "answer": "Lỗi xảy ra khi dùng kiểu mutable (như list, dict) làm giá trị mặc định cho tham số. Do đối tượng được tạo 1 lần lúc định nghĩa hàm, các lần gọi hàm sau sẽ thao tác trên cùng một đối tượng cũ.[cite: 17]",
+    "category": "Python",
+    "difficulty": "Hard",
+    "quiz_question": "Tại sao KHÔNG nên dùng list hoặc dict làm giá trị mặc định cho tham số của hàm (VD: def func(items=[]))?",
+    "options": [
+      {"id": "A", "text": "Vì cú pháp này gây ra SyntaxError"},
+      {"id": "B", "text": "Vì list/dict là mutable, chúng sẽ lưu trữ và cộng dồn dữ liệu qua các lần gọi hàm tiếp theo"},
+      {"id": "C", "text": "Vì list/dict làm chậm tốc độ thông dịch của Python"},
+      {"id": "D", "text": "Vì không thể sử dụng vòng lặp duyệt qua giá trị mặc định"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c13",
+    "question": "Mệnh đề else kết hợp với vòng lặp for/while hoạt động như thế nào?",
+    "answer": "Khối lệnh else sẽ chỉ được thực thi khi vòng lặp KẾT THÚC BÌNH THƯỜNG, tức là không bị ngắt giữa chừng bởi lệnh break.[cite: 16]",
+    "category": "Python",
+    "difficulty": "Hard",
+    "quiz_question": "Mệnh đề 'else' đi sau vòng lặp 'for' sẽ được kích hoạt khi nào?",
+    "options": [
+      {"id": "A", "text": "Khi vòng lặp gặp lệnh break"},
+      {"id": "B", "text": "Luôn luôn kích hoạt sau mỗi lần lặp"},
+      {"id": "C", "text": "Chỉ khi vòng lặp duyệt xong bình thường mà không gặp lệnh break"},
+      {"id": "D", "text": "Khi vòng lặp gặp lỗi Exception"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c14",
+    "question": "Hàm Generator trong Python khác hàm thông thường ở điểm nào?",
+    "answer": "Hàm Generator sử dụng từ khóa yield thay vì return, tạo ra quá trình xử lý lười (lazy evaluation) giúp tối ưu hóa bộ nhớ O(1) cho dữ liệu cực lớn.[cite: 17]",
+    "category": "Python",
+    "difficulty": "Medium",
+    "quiz_question": "Để tạo ra một hàm Generator, ta phải sử dụng từ khóa nào thay cho return?",
+    "options": [
+      {"id": "A", "text": "await"},
+      {"id": "B", "text": "yield"},
+      {"id": "C", "text": "lambda"},
+      {"id": "D", "text": "pass"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c15",
+    "question": "Mục đích chính của câu lệnh with (Context Manager) là gì?",
+    "answer": "Dùng để tự động quản lý vòng đời tài nguyên, đảm bảo việc dọn dẹp và giải phóng tài nguyên (như đóng file) tự động kể cả khi chương trình phát sinh Exception.[cite: 19]",
+    "category": "Python",
+    "difficulty": "Medium",
+    "quiz_question": "Trong Python, cú pháp 'with' (Context Manager) thường được sử dụng phổ biến nhất để làm gì?",
+    "options": [
+      {"id": "A", "text": "Quản lý và giải phóng tự động các tài nguyên (VD: tự đóng file, tự xả lock)"},
+      {"id": "B", "text": "Thay thế cho vòng lặp while true"},
+      {"id": "C", "text": "Tối ưu hoá hiệu năng cho list comprehension"},
+      {"id": "D", "text": "Ép kiểu dữ liệu an toàn"}
+    ],
+    "correct_option_ids": ["A"]
+  },
+  {
+    "id": "c16",
+    "question": "Khi mở file (open file), sự khác biệt giữa chế độ 'w' và 'a' là gì?",
+    "answer": "Chế độ 'w' sẽ xóa sạch nội dung cũ của file để ghi mới (hoặc tạo file nếu chưa có), trong khi chế độ 'a' giữ nguyên nội dung cũ và ghi thêm (append) vào cuối file.[cite: 18]",
+    "category": "Python",
+    "difficulty": "Easy",
+    "quiz_question": "Muốn mở một file văn bản để ghi nối tiếp dữ liệu vào cuối mà không xóa nội dung hiện tại, ta dùng mode nào?",
+    "options": [
+      {"id": "A", "text": "'r'"},
+      {"id": "B", "text": "'w'"},
+      {"id": "C", "text": "'x'"},
+      {"id": "D", "text": "'a'"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c17",
+    "question": "Triết lý EAFP trong viết mã nguồn Python nghĩa là gì?",
+    "answer": "EAFP (Easier to Ask Forgiveness than Permission) nghĩa là ưu tiên thực thi mã và dùng khối try-except để bắt lỗi thay vì dùng các lệnh if để kiểm tra trước luồng.[cite: 20]",
+    "category": "Python",
+    "difficulty": "Hard",
+    "quiz_question": "Triết lý EAFP (Easier to Ask Forgiveness than Permission) khuyến khích lập trình viên điều gì?",
+    "options": [
+      {"id": "A", "text": "Sử dụng nhiều lệnh if-else để kiểm tra biến trước khi thao tác"},
+      {"id": "B", "text": "Cứ thực thi lệnh bình thường, ưu tiên sử dụng try...except để bắt lỗi runtime"},
+      {"id": "C", "text": "Khai báo kiểu dữ liệu tĩnh cho mọi biến"},
+      {"id": "D", "text": "Sử dụng con trỏ bộ nhớ một cách cẩn thận"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c18",
+    "question": "Tác hại của việc dùng 'except:' trần (không chỉ định loại lỗi) là gì?",
+    "answer": "Việc dùng except trần sẽ che giấu các bug thực sự và nuốt mất lệnh ngắt hệ thống, làm cho quá trình gỡ lỗi (debug) trở nên rất khó khăn.[cite: 20]",
+    "category": "Python",
+    "difficulty": "Medium",
+    "quiz_question": "Vì sao PEP khuyến cáo không nên sử dụng khối lệnh 'except: pass' trần (không ghi rõ tên lỗi)?",
+    "options": [
+      {"id": "A", "text": "Nó có thể che giấu đi những bug hệ thống và nuốt luôn lệnh ngắt bàn phím (Ctrl+C)"},
+      {"id": "B", "text": "Nó làm cho PVM không biên dịch được bytecode"},
+      {"id": "C", "text": "Nó làm mã nguồn tốn nhiều dung lượng ổ cứng hơn"},
+      {"id": "D", "text": "Nó ép Python phải giải phóng bộ nhớ ngay lập tức"}
+    ],
+    "correct_option_ids": ["A"]
+  },
+  {
+    "id": "c19",
+    "question": "Vai trò của Môi trường ảo (Virtual Environment) trong Python là gì?",
+    "answer": "Môi trường ảo tạo ra một không gian độc lập chứa tập thư viện riêng cho từng dự án, giải quyết vấn đề xung đột phiên bản giữa các dự án khác nhau trên cùng một máy tính.[cite: 8][cite: 9]",
+    "category": "Python",
+    "difficulty": "Easy",
+    "quiz_question": "Công cụ/Package nào dưới đây KHÔNG phải là một trình quản lý môi trường ảo của Python?",
+    "options": [
+      {"id": "A", "text": "venv"},
+      {"id": "B", "text": "conda"},
+      {"id": "C", "text": "uv"},
+      {"id": "D", "text": "malloc"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c20",
+    "question": "Khóa thông dịch toàn cục (GIL) trong CPython mang lại hạn chế gì?",
+    "answer": "GIL giới hạn khả năng thực thi song song thực sự của các tiểu trình (đa luồng) khi chạy các tác vụ tính toán nặng (CPU-bound) trên hệ thống đa nhân.[cite: 6]",
+    "category": "Python",
+    "difficulty": "Hard",
+    "quiz_question": "Hạn chế kỹ thuật lớn nhất do khóa GIL (Global Interpreter Lock) gây ra trên CPython là gì?",
+    "options": [
+      {"id": "A", "text": "Không thể gọi được các hàm C/C++"},
+      {"id": "B", "text": "Không thể thu gom rác bộ nhớ"},
+      {"id": "C", "text": "Giới hạn khả năng thực thi đa luồng song song thực sự trên các hệ thống đa nhân"},
+      {"id": "D", "text": "Không hỗ trợ lập trình hướng đối tượng"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c21",
+    "question": "Khái niệm State (Trạng thái) và Behavior (Hành vi) của đối tượng trong OOP là gì?",
+    "answer": "State là giá trị của các thuộc tính đang lưu trong đối tượng, còn Behavior là những thao tác mà đối tượng có thể thực hiện trên dữ liệu đó.[cite: 22]",
+    "category": "OOP",
+    "difficulty": "Easy",
+    "quiz_question": "Trong Lập trình hướng đối tượng, thuật ngữ chỉ các thao tác mà đối tượng có thể thực hiện được gọi là gì?",
+    "options": [
+      {"id": "A", "text": "State (Trạng thái)"},
+      {"id": "B", "text": "Behavior (Hành vi)"},
+      {"id": "C", "text": "Responsibility (Trách nhiệm)"},
+      {"id": "D", "text": "Attribute (Thuộc tính)"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c22",
+    "question": "Cách tiếp cận tổ chức của lập trình OOP khác gì so với lập trình thủ tục?",
+    "answer": "Lập trình thủ tục tập trung vào hàm thao tác với dữ liệu, trong khi OOP tập trung vào đối tượng, nơi dữ liệu và hành vi được gắn kết với nhau.[cite: 22]",
+    "category": "OOP",
+    "difficulty": "Easy",
+    "quiz_question": "Sự khác biệt cốt lõi về tổ chức mã nguồn giữa Lập trình thủ tục và Lập trình OOP là gì?",
+    "options": [
+      {"id": "A", "text": "OOP chạy nhanh hơn do không dùng hàm"},
+      {"id": "B", "text": "Lập trình thủ tục gom dữ liệu và hành vi vào một đối tượng duy nhất"},
+      {"id": "C", "text": "OOP gắn kết dữ liệu và hành vi vào cùng một đối tượng, còn thủ tục tách biệt chúng"},
+      {"id": "D", "text": "OOP chỉ dùng cho các bài toán có luồng dữ liệu nhỏ và đơn giản"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c23",
+    "question": "Tham số 'self' trong phương thức __init__ và các Instance method có ý nghĩa gì?",
+    "answer": "Tham số 'self' là tham chiếu đến instance hiện tại đang gọi phương thức, giúp truy cập thuộc tính hoặc gọi các method khác trong cùng đối tượng đó.[cite: 23]",
+    "category": "OOP",
+    "difficulty": "Medium",
+    "quiz_question": "Điều gì sẽ xảy ra nếu bạn quên định nghĩa tham số 'self' trong một instance method (VD: def __init__(ID=None))?",
+    "options": [
+      {"id": "A", "text": "Python sẽ báo lỗi TypeError khi khởi tạo đối tượng do truyền dư tham số"},
+      {"id": "B", "text": "Hàm vẫn chạy bình thường và tự động nhận diện đối tượng ngầm"},
+      {"id": "C", "text": "Các biến bên trong hàm sẽ tự động trở thành class variables"},
+      {"id": "D", "text": "Trình biên dịch của Python sẽ tự động chèn chữ 'self' vào mã Bytecode"}
+    ],
+    "correct_option_ids": ["A"]
+  },
+  {
+    "id": "c24",
+    "question": "Sự khác biệt giữa toán tử 'is' và '==' đối với object là gì?",
+    "answer": "Toán tử 'is' kiểm tra xem hai biến có tham chiếu đến cùng một object (cùng Identity) hay không, còn '==' kiểm tra xem hai giá trị (State) có bằng nhau không.[cite: 23]",
+    "category": "OOP",
+    "difficulty": "Medium",
+    "quiz_question": "Trong Python, toán tử nào dùng để kiểm tra xem hai biến có tham chiếu đến cùng một vùng nhớ (định danh object) hay không?",
+    "options": [
+      {"id": "A", "text": "=="},
+      {"id": "B", "text": "==="},
+      {"id": "C", "text": "is"},
+      {"id": "D", "text": "equals"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c25",
+    "question": "Class variables và Instance variables khác nhau về phạm vi ảnh hưởng như thế nào?",
+    "answer": "Class variables được dùng chung cho tất cả các objects của class, trong khi Instance variables là của riêng mỗi object và sự thay đổi chỉ ảnh hưởng đến object đó.[cite: 24]",
+    "category": "OOP",
+    "difficulty": "Medium",
+    "quiz_question": "Khẳng định nào ĐÚNG khi nói về Class variables?",
+    "options": [
+      {"id": "A", "text": "Chỉ có thể được truy cập bằng các hàm static"},
+      {"id": "B", "text": "Được dùng chung bởi tất cả các objects của class đó"},
+      {"id": "C", "text": "Chỉ tồn tại ở object đầu tiên được tạo ra"},
+      {"id": "D", "text": "Sự thay đổi của nó trên một object không làm ảnh hưởng đến các object khác"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c26",
+    "question": "Decorator @property trong OOP Python được dùng với mục đích gì?",
+    "answer": "@property dùng để định nghĩa getter/setter, giúp việc truy cập thuộc tính tự nhiên như một biến (vd: s.score) đồng thời đảm bảo điều kiện hợp lệ khi gán.[cite: 24]",
+    "category": "OOP",
+    "difficulty": "Hard",
+    "quiz_question": "Lợi ích chính của việc sử dụng decorator @property là gì?",
+    "options": [
+      {"id": "A", "text": "Giúp khóa không cho class khác kế thừa"},
+      {"id": "B", "text": "Biến class thành một Abstract Base Class (ABC)"},
+      {"id": "C", "text": "Gộp nhiều đối tượng vào một biến mảng duy nhất"},
+      {"id": "D", "text": "Truy cập method như một thuộc tính tự nhiên và hỗ trợ kiểm tra điều kiện gán qua setter"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c27",
+    "question": "Class Method trong Python khác biệt như thế nào về tham số đầu tiên so với Instance Method?",
+    "answer": "Class Method sử dụng tham số đầu tiên là 'cls' (đại diện cho class), khác với Instance Method nhận tham số đầu tiên là 'self' (đại diện cho object).[cite: 25]",
+    "category": "OOP",
+    "difficulty": "Medium",
+    "quiz_question": "Tham số bắt buộc đầu tiên của một phương thức được bọc bởi @classmethod là gì?",
+    "options": [
+      {"id": "A", "text": "self"},
+      {"id": "B", "text": "cls"},
+      {"id": "C", "text": "Không cần tham số bắt buộc"},
+      {"id": "D", "text": "object"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c28",
+    "question": "Đặc điểm của Static Method (@staticmethod) là gì?",
+    "answer": "Static Method không nhận tham số 'self' hay 'cls', đóng vai trò như một hàm bình thường, được đặt trong class để nhóm các logic tiện ích liên quan nhưng không phụ thuộc vào trạng thái.[cite: 25]",
+    "category": "OOP",
+    "difficulty": "Medium",
+    "quiz_question": "Sử dụng loại Method nào là phù hợp nhất đối với các hàm tiện ích hoàn toàn độc lập, không cần truy cập vào trạng thái của object hay class?",
+    "options": [
+      {"id": "A", "text": "Instance Method"},
+      {"id": "B", "text": "Class Method (@classmethod)"},
+      {"id": "C", "text": "Static Method (@staticmethod)"},
+      {"id": "D", "text": "Magic Method"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c29",
+    "question": "Sự khác biệt giữa dunder method __str__ và __repr__ là gì?",
+    "answer": "__str__ trả về chuỗi hiển thị dễ đọc cho người dùng, trong khi __repr__ trả về chuỗi mô tả chính xác nhằm tái tạo được object đó cho lập trình viên.[cite: 25]",
+    "category": "OOP",
+    "difficulty": "Hard",
+    "quiz_question": "Khi gọi hàm repr(obj) trong Python, dunder method nào sau đây sẽ được ưu tiên thực thi?",
+    "options": [
+      {"id": "A", "text": "__str__"},
+      {"id": "B", "text": "__repr__"},
+      {"id": "C", "text": "__format__"},
+      {"id": "D", "text": "__print__"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c30",
+    "question": "Magic method nào được dùng để nạp chồng phép toán cộng (+) và so sánh bằng (==)?",
+    "answer": "Python sử dụng __add__(self, other) để nạp chồng phép cộng và __eq__(self, other) cho phép so sánh bằng.[cite: 26]",
+    "category": "OOP",
+    "difficulty": "Medium",
+    "quiz_question": "Để định nghĩa hành vi khi sử dụng toán tử == giữa hai object, ta cần cài đặt magic method nào?",
+    "options": [
+      {"id": "A", "text": "__add__"},
+      {"id": "B", "text": "__is__"},
+      {"id": "C", "text": "__compare__"},
+      {"id": "D", "text": "__eq__"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c31",
+    "question": "Để tạo một Context Manager hoạt động với lệnh 'with', class cần triển khai các dunder method nào?",
+    "answer": "Cần triển khai __enter__(self) được gọi khi bắt đầu khối lệnh with, và __exit__(self, exc_type, exc_val, exc_tb) để dọn dẹp tài nguyên khi thoát.[cite: 26]",
+    "category": "OOP",
+    "difficulty": "Hard",
+    "quiz_question": "Khi một class muốn tự động quản lý tài nguyên (mở/đóng file an toàn) qua từ khóa 'with', class đó bắt buộc phải có hai dunder methods nào?",
+    "options": [
+      {"id": "A", "text": "__open__ và __close__"},
+      {"id": "B", "text": "__start__ và __stop__"},
+      {"id": "C", "text": "__enter__ và __exit__"},
+      {"id": "D", "text": "__init__ và __del__"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c32",
+    "question": "Cách chuẩn nhất để tạo Interface hoặc tính trừu tượng trong Python là gì?",
+    "answer": "Cách chuẩn là sử dụng Abstract Base Class (ABC) và dùng decorator @abstractmethod để mô tả các thao tác bắt buộc class con phải triển khai.[cite: 27]",
+    "category": "OOP",
+    "difficulty": "Hard",
+    "quiz_question": "Để ép buộc các class con bắt buộc phải cài đặt lại một phương thức từ class cha (Interface), ta dùng kỹ thuật nào?",
+    "options": [
+      {"id": "A", "text": "Kế thừa từ class BaseException"},
+      {"id": "B", "text": "Sử dụng decorator @abstractmethod trong một lớp kế thừa từ ABC"},
+      {"id": "C", "text": "Sử dụng decorator @classmethod"},
+      {"id": "D", "text": "Dùng lệnh super() trong hàm __init__"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c33",
+    "question": "Sự khác nhau cơ bản giữa tính Kế thừa (Inheritance) và Composition là gì?",
+    "answer": "Kế thừa đại diện cho mối quan hệ IS-A (Là một), còn Composition đại diện cho mối quan hệ HAS-A (Có một) – khi đối tượng này là thuộc tính của đối tượng kia.[cite: 27]",
+    "category": "OOP",
+    "difficulty": "Medium",
+    "quiz_question": "Khái niệm Composition (HAS-A) trong OOP khuyên chúng ta nên làm gì thay vì lạm dụng kế thừa?",
+    "options": [
+      {"id": "A", "text": "Biến mọi thuộc tính thành Private"},
+      {"id": "B", "text": "Chỉ sử dụng @staticmethod"},
+      {"id": "C", "text": "Để đối tượng này làm một thuộc tính cấu thành của đối tượng kia (Ví dụ: Động cơ nằm trong Xe)"},
+      {"id": "D", "text": "Luôn dùng Interface để thay thế Class"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c34",
+    "question": "Kỹ thuật Dependency Injection (DI) có tác dụng gì trong thiết kế OOP?",
+    "answer": "Dependency Injection (DI) là kỹ thuật truyền các đối tượng phụ thuộc từ bên ngoài vào (thường qua __init__) thay vì class tự khởi tạo chúng, giúp tuân thủ nguyên lý đảo ngược phụ thuộc.[cite: 28]",
+    "category": "OOP",
+    "difficulty": "Hard",
+    "quiz_question": "Kỹ thuật truyền (tiêm) một đối tượng phụ thuộc từ bên ngoài vào class thông qua hàm tạo __init__ được gọi là gì?",
+    "options": [
+      {"id": "A", "text": "Dependency Injection (DI)"},
+      {"id": "B", "text": "Method Overloading"},
+      {"id": "C", "text": "Abstract Base Class"},
+      {"id": "D", "text": "Duck Typing"}
+    ],
+    "correct_option_ids": ["A"]
+  },
+  {
+    "id": "c35",
+    "question": "Python hiện thực tính đa hình (Polymorphism) bằng những cách nào thay vì Method Overloading truyền thống?",
+    "answer": "Tính đa hình được thể hiện qua cơ chế Ghi đè (Overriding) phương thức kế thừa và Duck Typing (kiểm tra xem object có method cần thiết hay không chứ không kiểm tra kiểu).[cite: 28]",
+    "category": "OOP",
+    "difficulty": "Hard",
+    "quiz_question": "Trong Python, thuật ngữ mô tả hành vi 'Không quan tâm đến kiểu dữ liệu thực sự, miễn là đối tượng đó có chứa method cần thiết' là gì?",
+    "options": [
+      {"id": "A", "text": "Method Overloading"},
+      {"id": "B", "text": "Type Hinting"},
+      {"id": "C", "text": "Duck Typing"},
+      {"id": "D", "text": "Dependency Injection"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c36",
+    "question": "Quy ước đặt tên cho thuộc tính mang tính chất Private (chỉ dùng nội bộ) trong class Python là gì?",
+    "answer": "Thuộc tính Private được quy ước bằng việc đặt hai dấu gạch dưới (__) ở đầu tên (vd: __name), nhằm kích hoạt cơ chế mangling đổi tên nội bộ.[cite: 28]",
+    "category": "OOP",
+    "difficulty": "Medium",
+    "quiz_question": "Để khai báo một thuộc tính mang ý nghĩa Private (ẩn giấu thông tin nghiêm ngặt nhất) theo chuẩn OOP Python, ta dùng quy ước đặt tên nào?",
+    "options": [
+      {"id": "A", "text": "Sử dụng chữ in hoa (NAME)"},
+      {"id": "B", "text": "Bắt đầu bằng một dấu gạch dưới (_name)"},
+      {"id": "C", "text": "Kết thúc bằng một dấu gạch dưới (name_)"},
+      {"id": "D", "text": "Bắt đầu bằng hai dấu gạch dưới (__name)"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c37",
+    "question": "Nguyên lý 'Tell, Don't Ask' trong thiết kế OOP khuyên chúng ta điều gì?",
+    "answer": "Nguyên lý này nhấn mạnh việc thay vì gọi getter lấy dữ liệu ra ngoài để tự tính toán rồi gán lại, hãy bảo bản thân đối tượng đó tự thực hiện hành vi cập nhật nội bộ.[cite: 28]",
+    "category": "OOP",
+    "difficulty": "Hard",
+    "quiz_question": "Nguyên lý thiết kế 'Tell, Don't Ask' liên quan mật thiết nhất đến tính chất nào trong OOP?",
+    "options": [
+      {"id": "A", "text": "Tính đóng gói (Encapsulation) - hạn chế lôi dữ liệu nội bộ ra ngoài thao tác"},
+      {"id": "B", "text": "Tính đa hình (Polymorphism)"},
+      {"id": "C", "text": "Tính kế thừa (Inheritance)"},
+      {"id": "D", "text": "Khởi tạo nhanh với Dataclass"}
+    ],
+    "correct_option_ids": ["A"]
+  },
+  {
+    "id": "c38",
+    "question": "Lợi ích của việc sử dụng decorator @dataclass (từ Python 3.7) là gì?",
+    "answer": "@dataclass tự động sinh ra các method thường dùng như __init__, __repr__, __eq__, giúp giảm bớt mã thừa (boilerplate) và tập trung vào mô hình lưu trữ dữ liệu.[cite: 29]",
+    "category": "OOP",
+    "difficulty": "Medium",
+    "quiz_question": "Điều gì là LỢI ÍCH CHÍNH của việc bọc một class bằng @dataclass?",
+    "options": [
+      {"id": "A", "text": "Tăng tốc độ tính toán số học của class"},
+      {"id": "B", "text": "Cho phép class tự động lưu trữ vào Database"},
+      {"id": "C", "text": "Tự động sinh ra các phương thức cơ bản (như __init__, __repr__) giúp giảm mã boilerplate"},
+      {"id": "D", "text": "Ngăn chặn mọi thay đổi từ bên ngoài vào class"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c39",
+    "question": "Làm thế nào để tạo ra một object chỉ đọc (read-only) khi sử dụng Dataclass?",
+    "answer": "Để tạo object Dataclass ở trạng thái read-only, ta cần thêm tham số 'frozen=True' vào decorator nhằm chặn việc gán lại giá trị cho các field.[cite: 29]",
+    "category": "OOP",
+    "difficulty": "Hard",
+    "quiz_question": "Tham số nào được dùng trong @dataclass để khóa đối tượng thành dạng chỉ đọc (read-only), không cho phép thay đổi các thuộc tính sau khi tạo?",
+    "options": [
+      {"id": "A", "text": "read_only=True"},
+      {"id": "B", "text": "frozen=True"},
+      {"id": "C", "text": "immutable=True"},
+      {"id": "D", "text": "static=True"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c40",
+    "question": "Thư viện Pydantic hỗ trợ những tính năng mạnh mẽ nào so với class thường?",
+    "answer": "Pydantic giúp phân tích, tự động chuyển đổi kiểu (cast) và kiểm tra dữ liệu hợp lệ (validation) tại runtime dựa trên type annotations, đặc biệt phù hợp khi làm việc với API hoặc JSON.[cite: 29]",
+    "category": "OOP",
+    "difficulty": "Hard",
+    "quiz_question": "Sự khác biệt cốt lõi nhất khiến Pydantic BaseModel ưu việt hơn @dataclass khi xử lý dữ liệu ngoại vi (như gọi API/JSON) là gì?",
+    "options": [
+      {"id": "A", "text": "Pydantic có tốc độ khởi tạo đối tượng nhanh gấp 10 lần"},
+      {"id": "B", "text": "Pydantic tự động sinh ra file HTML"},
+      {"id": "C", "text": "Pydantic tích hợp sẵn cơ chế kiểm tra (validation) và ép kiểu (cast) dữ liệu runtime một cách chặt chẽ"},
+      {"id": "D", "text": "Pydantic không sử dụng bộ nhớ RAM"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c41",
+    "question": "Trong Python, biến (variable) và dữ liệu có mối quan hệ như thế nào?",
+    "answer": "Biến không trực tiếp chứa dữ liệu, mà nó là một tên dùng để tham chiếu đến một object trong bộ nhớ.[cite: 30]",
+    "category": "DSA",
+    "difficulty": "Easy",
+    "quiz_question": "Phát biểu nào sau đây ĐÚNG về khái niệm biến trong Python?",
+    "options": [
+      {"id": "A", "text": "Biến lưu trữ trực tiếp dữ liệu ở dạng nhị phân"},
+      {"id": "B", "text": "Biến đóng vai trò như một hằng số không thể thay đổi"},
+      {"id": "C", "text": "Biến là một tên dùng để tham chiếu (trỏ) đến một object trong bộ nhớ"},
+      {"id": "D", "text": "Nhiều biến không thể cùng trỏ tới một object"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c42",
+    "question": "Sự khác biệt giữa Immutable Object và Mutable Object là gì?",
+    "answer": "Mutable object (như list, dict) có thể thay đổi nội dung trực tiếp sau khi tạo. Ngược lại, Immutable object (như int, str, tuple) không thể thay đổi nội dung; thao tác 'sửa đổi' thực chất là tạo ra object mới và trỏ biến tới đó.[cite: 31, 32]",
+    "category": "DSA",
+    "difficulty": "Medium",
+    "quiz_question": "Các kiểu dữ liệu nào dưới đây thuộc nhóm Immutable (không thể thay đổi nội dung gốc)?",
+    "options": [
+      {"id": "A", "text": "list, dict, set"},
+      {"id": "B", "text": "int, float, bool, str, tuple"},
+      {"id": "C", "text": "bytearray, list, dict"},
+      {"id": "D", "text": "set, tuple, int"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c43",
+    "question": "Big-O Notation (Ký hiệu O lớn) đo lường điều gì?",
+    "answer": "Big-O mô tả tốc độ tăng trưởng tài nguyên (thời gian hoặc bộ nhớ) dựa theo sự thay đổi của kích thước đầu vào khi đầu vào tiến về vô cùng.[cite: 33]",
+    "category": "DSA",
+    "difficulty": "Easy",
+    "quiz_question": "Mục đích chính của việc sử dụng Big-O Notation là gì?",
+    "options": [
+      {"id": "A", "text": "Đo thời gian chạy thực tế của thuật toán bằng giây (seconds)"},
+      {"id": "B", "text": "Đo số byte bộ nhớ thuật toán tiêu thụ chính xác"},
+      {"id": "C", "text": "Mô tả tốc độ tăng trưởng tài nguyên khi kích thước dữ liệu đầu vào tiến về vô cùng"},
+      {"id": "D", "text": "Tối ưu hóa các thao tác I/O với hệ thống"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c44",
+    "question": "Quy tắc cốt lõi khi rút gọn Big-O Notation của một thuật toán là gì?",
+    "answer": "Cần Bỏ qua Hằng số (Drop Constants) và Bỏ các thành phần tăng chậm hơn (Drop Non-Dominant Terms), chỉ giữ lại hạng tử tăng trưởng nhanh nhất (ví dụ: O(n² + n) thành O(n²)).[cite: 34]",
+    "category": "DSA",
+    "difficulty": "Medium",
+    "quiz_question": "Dựa trên quy tắc xác định Big-O, độ phức tạp O(5n³ + 100n² + 5000) sẽ được rút gọn thành gì?",
+    "options": [
+      {"id": "A", "text": "O(100n²)"},
+      {"id": "B", "text": "O(5n³)"},
+      {"id": "C", "text": "O(n³)"},
+      {"id": "D", "text": "O(n)"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c45",
+    "question": "Sự khác biệt giữa Độ phức tạp thời gian (Time Complexity) và Độ phức tạp không gian (Space Complexity)?",
+    "answer": "Độ phức tạp thời gian đo lường số lượng thao tác cần thiết theo n, trong khi Độ phức tạp không gian đo lượng bộ nhớ phụ thêm (Auxiliary Space) cần cấp phát ngoài dữ liệu đầu vào ban đầu.[cite: 34]",
+    "category": "DSA",
+    "difficulty": "Medium",
+    "quiz_question": "Nếu một thuật toán tạo ra một mảng mới có kích thước đúng bằng mảng đầu vào n, thì Space Complexity của thuật toán đó là bao nhiêu?",
+    "options": [
+      {"id": "A", "text": "O(1)"},
+      {"id": "B", "text": "O(log n)"},
+      {"id": "C", "text": "O(n)"},
+      {"id": "D", "text": "O(n²)"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c46",
+    "question": "Phân tích khấu trừ (Amortized Complexity) là gì?",
+    "answer": "Áp dụng cho trường hợp có một chuỗi thao tác phần lớn chạy rất nhanh O(1), nhưng thỉnh thoảng có 1 thao tác đắt đỏ O(n). Tính trung bình trên toàn chuỗi thì chi phí vẫn chỉ là O(1) (ví dụ: append() vào mảng động).[cite: 35]",
+    "category": "DSA",
+    "difficulty": "Hard",
+    "quiz_question": "Thuật ngữ đánh giá độ phức tạp trung bình của một chuỗi thao tác (nơi hầu hết chạy tốn O(1) và một số rất ít tốn O(n)) được gọi là gì?",
+    "options": [
+      {"id": "A", "text": "Worst Case Complexity"},
+      {"id": "B", "text": "Best Case Complexity"},
+      {"id": "C", "text": "Space Complexity"},
+      {"id": "D", "text": "Amortized Complexity"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c47",
+    "question": "Danh sách List trong Python được cài đặt theo cấu trúc dữ liệu nào và cơ chế mở rộng bộ nhớ ra sao?",
+    "answer": "List là một Dynamic Array (Mảng động). Nó cấp phát dư bộ nhớ dự phòng, khi mảng đầy sẽ tự động tạo mảng lớn hơn và copy dữ liệu cũ sang (chi phí khấu trừ O(1)).[cite: 35]",
+    "category": "DSA",
+    "difficulty": "Medium",
+    "quiz_question": "Cấu trúc dữ liệu List trong Python được implement dựa trên kiến trúc nào?",
+    "options": [
+      {"id": "A", "text": "Linked List"},
+      {"id": "B", "text": "Mảng động (Dynamic Array)"},
+      {"id": "C", "text": "Hash Table"},
+      {"id": "D", "text": "Binary Search Tree"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c48",
+    "question": "Thao tác chèn vào giữa danh sách l.insert(i, x) tốn bao nhiêu thời gian và vì sao?",
+    "answer": "Thao tác này tốn O(n) do hệ thống phải dịch chuyển toàn bộ các phần tử phía sau vị trí i để tạo khoảng trống chèn phần tử mới.[cite: 36]",
+    "category": "DSA",
+    "difficulty": "Medium",
+    "quiz_question": "Vì sao hàm l.insert(0, x) (chèn vào đầu mảng) của một List trong Python có độ phức tạp thời gian là O(n)?",
+    "options": [
+      {"id": "A", "text": "Vì nó phải sắp xếp lại toàn bộ mảng"},
+      {"id": "B", "text": "Vì thao tác chèn phải cập nhật lại Linked List"},
+      {"id": "C", "text": "Vì nó phải dịch chuyển mọi phần tử hiện có sang bên phải một vị trí"},
+      {"id": "D", "text": "Vì nó phải tìm kiếm O(n) để biết điểm chèn"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c49",
+    "question": "Tuple là gì và tính 'hashable' của nó có ý nghĩa gì?",
+    "answer": "Tuple là tập dữ liệu sequence không thể thay đổi (immutable). Nếu mọi phần tử bên trong tuple đều hashable, ta có thể dùng tuple đó làm Key trong Dictionary hoặc phần tử của Set.[cite: 36, 37]",
+    "category": "DSA",
+    "difficulty": "Medium",
+    "quiz_question": "Khi nào một Tuple có thể được sử dụng làm Key trong một Dictionary?",
+    "options": [
+      {"id": "A", "text": "Bất cứ khi nào tạo ra tuple"},
+      {"id": "B", "text": "Chỉ khi toàn bộ phần tử chứa trong Tuple đó đều có tính Hashable"},
+      {"id": "C", "text": "Khi Tuple đó chứa ít nhất một list"},
+      {"id": "D", "text": "Chỉ khi được ép kiểu bằng hàm dict()"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c50",
+    "question": "Dictionary và Set của Python hoạt động dựa trên cấu trúc dữ liệu cơ bản nào?",
+    "answer": "Cả Dictionary (lưu Key-Value) và Set (lưu giá trị duy nhất) đều được implement dưới dạng Hash Table, giúp các thao tác Lookup, Insert, Update đạt mức trung bình O(1).[cite: 37, 38]",
+    "category": "DSA",
+    "difficulty": "Easy",
+    "quiz_question": "Nhờ vào cấu trúc dữ liệu cốt lõi nào mà các thao tác tra cứu (lookup) và thêm mới của Set và Dict trong Python có thể đạt tốc độ O(1) trung bình?",
+    "options": [
+      {"id": "A", "text": "Linked List"},
+      {"id": "B", "text": "Stack"},
+      {"id": "C", "text": "Hash Table (Bảng băm)"},
+      {"id": "D", "text": "Binary Search Tree"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c51",
+    "question": "Sự khác biệt giữa việc sao chép bằng Shallow Copy và Deep Copy đối với cấu trúc dữ liệu lồng nhau là gì?",
+    "answer": "Shallow Copy tạo object ngoài mới nhưng các object con vẫn chia sẻ reference cũ. Deep Copy tạo một bản sao độc lập hoàn toàn cho cả object ngoài và toàn bộ hệ thống object con bên trong.[cite: 39]",
+    "category": "DSA",
+    "difficulty": "Hard",
+    "quiz_question": "Nếu dùng Shallow Copy cho một mảng hai chiều (mảng chứa mảng), điều gì sẽ xảy ra khi ta chỉnh sửa mảng con ở bản sao?",
+    "options": [
+      {"id": "A", "text": "Hệ thống sẽ báo lỗi"},
+      {"id": "B", "text": "Mảng gốc sẽ không bị ảnh hưởng"},
+      {"id": "C", "text": "Mảng gốc cũng sẽ bị thay đổi theo do chúng vẫn dùng chung reference của mảng con"},
+      {"id": "D", "text": "Toàn bộ mảng sẽ tự động được biến đổi thành Deep Copy"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c52",
+    "question": "Đặc trưng bộ nhớ của Linked List (Danh sách liên kết) so với Array là gì?",
+    "answer": "Trong khi Array yêu cầu cấp phát bộ nhớ liên tiếp liền kề nhau, các Node của Linked List nằm rải rác trên RAM và duy trì liên kết bằng cách Node trước nắm giữ reference (pointer) của Node sau.[cite: 39, 40]",
+    "category": "DSA",
+    "difficulty": "Medium",
+    "quiz_question": "Một lợi điểm của Linked List so với Array thông thường về mặt bộ nhớ là gì?",
+    "options": [
+      {"id": "A", "text": "Lấy giá trị theo chỉ mục Random Access đạt O(1)"},
+      {"id": "B", "text": "Không yêu cầu một khối bộ nhớ lớn liên tục, các Node có thể nằm rải rác trên RAM"},
+      {"id": "C", "text": "Chiếm ít dung lượng RAM hơn do không cần lưu reference (pointer)"},
+      {"id": "D", "text": "Tự động sắp xếp phần tử khi nạp dữ liệu vào"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c53",
+    "question": "Trong Linked List, tác dụng của việc sử dụng Sentinel Node / Dummy Node đặt trước Head là gì?",
+    "answer": "Sentinel / Dummy Node được dùng để chuẩn hóa các thao tác chèn và xóa, giúp tránh việc phải viết code xử lý rẽ nhánh đặc biệt cho trường hợp thêm/xóa khi danh sách bị rỗng.[cite: 40]",
+    "category": "DSA",
+    "difficulty": "Hard",
+    "quiz_question": "Tại sao trong quá trình cài đặt Linked List, người ta thường dùng thêm một Dummy Node (Node giả) đặt ngay trước Head?",
+    "options": [
+      {"id": "A", "text": "Để lưu trữ độ dài của Linked List"},
+      {"id": "B", "text": "Để chuẩn hóa logic thêm/xóa phần tử, tránh các trường hợp rẽ nhánh phức tạp khi danh sách rỗng"},
+      {"id": "C", "text": "Để mã hóa dữ liệu bảo mật trước khi thêm vào Node"},
+      {"id": "D", "text": "Để dễ dàng sử dụng thuật toán Binary Search"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c54",
+    "question": "Ngăn xếp (Stack) tuân thủ quy tắc dữ liệu nào và nên dùng cấu trúc nào của Python để cài đặt tối ưu?",
+    "answer": "Stack theo quy tắc LIFO (Last-In, First-Out). Nên implement bằng collections.deque thay vì list để tránh việc phải tái cấp phát bộ nhớ (reallocate).[cite: 40]",
+    "category": "DSA",
+    "difficulty": "Medium",
+    "quiz_question": "Theo nguyên lý LIFO của cấu trúc Stack, phần tử nào sẽ được lấy ra khi gọi thao tác Pop?",
+    "options": [
+      {"id": "A", "text": "Phần tử được thêm vào đầu tiên"},
+      {"id": "B", "text": "Phần tử nằm giữa danh sách"},
+      {"id": "C", "text": "Phần tử lớn nhất trong danh sách"},
+      {"id": "D", "text": "Phần tử được thêm vào sau cùng (mới nhất)"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c55",
+    "question": "Hàng đợi (Queue) tuân thủ quy tắc nào và lý do KHÔNG nên dùng lệnh list.pop(0) cho Queue là gì?",
+    "answer": "Queue tuân thủ quy tắc FIFO (First-In, First-Out). Lệnh list.pop(0) tốn O(n) do phải dịch chuyển toàn bộ mảng, thay vào đó nên dùng deque.popleft() để đạt O(1).[cite: 41]",
+    "category": "DSA",
+    "difficulty": "Hard",
+    "quiz_question": "Tại sao việc dùng phương thức pop(0) trên kiểu danh sách (list) để mô phỏng thao tác lấy ra từ Queue lại bị coi là thực hành xấu (bad practice)?",
+    "options": [
+      {"id": "A", "text": "Nó có độ phức tạp O(n) vì phải dịch chuyển toàn bộ phần tử còn lại sang trái"},
+      {"id": "B", "text": "Nó sẽ xóa toàn bộ danh sách"},
+      {"id": "C", "text": "Nó lấy ra phần tử ở cuối thay vì ở đầu"},
+      {"id": "D", "text": "Nó vi phạm quy tắc Last-In, First-Out"}
+    ],
+    "correct_option_ids": ["A"]
+  },
+  {
+    "id": "c56",
+    "question": "Bảng băm (Hash Table) xử lý tình trạng va chạm (Collision) bằng 2 phương pháp chính nào?",
+    "answer": "Sử dụng Chaining (Mỗi bucket chứa 1 Linked List) và Open Addressing (Dò tuyến tính hoặc bậc hai để tìm ô trống khác nếu ô đã bị chiếm).[cite: 41, 42]",
+    "category": "DSA",
+    "difficulty": "Hard",
+    "quiz_question": "Trong Hash Table, kỹ thuật xử lý va chạm mà mỗi vị trí bộ nhớ (bucket) đóng vai trò là phần đầu của một Linked List được gọi là gì?",
+    "options": [
+      {"id": "A", "text": "Open Addressing"},
+      {"id": "B", "text": "Binary Searching"},
+      {"id": "C", "text": "Linear Probing"},
+      {"id": "D", "text": "Chaining"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c57",
+    "question": "Tính chất của một cây Binary Search Tree (BST) là gì và kỹ thuật duyệt nào sẽ xuất ra kết quả tăng dần?",
+    "answer": "Tính chất của BST là Node bên trái nhỏ hơn Node gốc, và Node bên phải lớn hơn Node gốc. Kỹ thuật duyệt In-order (Trái -> Gốc -> Phải) sẽ sinh ra chuỗi số liệu tăng dần.[cite: 42]",
+    "category": "DSA",
+    "difficulty": "Hard",
+    "quiz_question": "Khi thực hiện thuật toán duyệt In-order (Trái -> Gốc -> Phải) trên một Binary Search Tree (BST) chuẩn, kết quả nhận được sẽ có đặc điểm gì?",
+    "options": [
+      {"id": "A", "text": "Chuỗi giảm dần"},
+      {"id": "B", "text": "Chuỗi sắp xếp ngẫu nhiên"},
+      {"id": "C", "text": "Chuỗi được sắp xếp tăng dần"},
+      {"id": "D", "text": "Chỉ lấy các Node ở tầng lá (Leaf nodes)"}
+    ],
+    "correct_option_ids": ["C"]
+  },
+  {
+    "id": "c58",
+    "question": "Điều gì xảy ra với hiệu năng O(log n) của Binary Search Tree (BST) nếu chèn dữ liệu đã bị sắp xếp tuần tự?",
+    "answer": "Khi chèn liên tiếp các dữ liệu đã sắp xếp, BST sẽ bị lệch hoàn toàn về một bên, suy hao biến thành một cấu trúc như Linked List (danh sách), khiến hiệu năng giảm xuống còn O(n).[cite: 42]",
+    "category": "DSA",
+    "difficulty": "Medium",
+    "quiz_question": "Độ phức tạp O(log n) của thao tác tìm kiếm trên Binary Search Tree (BST) sẽ suy giảm nghiêm trọng thành O(n) (Worst Case) trong trường hợp nào?",
+    "options": [
+      {"id": "A", "text": "Khi cây chứa nhiều phần tử âm"},
+      {"id": "B", "text": "Khi dữ liệu chèn vào bị lệch hoàn toàn (ví dụ: mảng đã được sắp xếp sẵn từ trước)"},
+      {"id": "C", "text": "Khi cây chứa cả số nguyên và chuỗi"},
+      {"id": "D", "text": "Khi có nhiều Node có cùng một giá trị (Duplicate Nodes)"}
+    ],
+    "correct_option_ids": ["B"]
+  },
+  {
+    "id": "c59",
+    "question": "Heap (Min-Heap / Max-Heap) là gì và ứng dụng tiêu biểu của nó?",
+    "answer": "Heap là một Complete Binary Tree thường được biểu diễn trên mảng 1 chiều. Nó cực kỳ tối ưu cho việc rút trích giá trị lớn nhất/nhỏ nhất (O(log n)), ứng dụng cho lấy Top-K hoặc thuật toán Dijkstra.[cite: 42]",
+    "category": "DSA",
+    "difficulty": "Hard",
+    "quiz_question": "Cấu trúc dữ liệu nào dưới đây là lựa chọn tối ưu nhất nếu bài toán yêu cầu liên tục tìm và lấy ra giá trị Nhỏ nhất / Lớn nhất khỏi hệ thống?",
+    "options": [
+      {"id": "A", "text": "Mảng hai chiều (2D Array)"},
+      {"id": "B", "text": "Linked List"},
+      {"id": "C", "text": "Hash Table"},
+      {"id": "D", "text": "Heap (Min-Heap / Max-Heap)"}
+    ],
+    "correct_option_ids": ["D"]
+  },
+  {
+    "id": "c60",
+    "question": "Ưu nhược điểm của cách biểu diễn Đồ thị (Graph) bằng Adjacency Matrix (Ma trận kề) là gì?",
+    "answer": "Nhược điểm là nó tiêu thụ rất nhiều bộ nhớ O(V²) với V là số đỉnh đồ thị, nhưng đổi lại ưu điểm là thao tác kiểm tra sự tồn tại của cạnh liên kết lại rất nhanh, đạt O(1).[cite: 42]",
+    "category": "DSA",
+    "difficulty": "Hard",
+    "quiz_question": "Khi biểu diễn một đồ thị G = (V, E) bằng Ma trận kề (Adjacency Matrix), độ phức tạp không gian lưu trữ (Space Complexity) sẽ là bao nhiêu?",
+    "options": [
+      {"id": "A", "text": "O(V + E)"},
+      {"id": "B", "text": "O(1)"},
+      {"id": "C", "text": "O(V²)"},
+      {"id": "D", "text": "O(E²)"}
+    ],
+    "correct_option_ids": ["C"]
+  }
 ]
