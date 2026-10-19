@@ -1,20 +1,13 @@
 [
     {
-        "player_name": "Minh Trí",
-        "total_score": 1500,
-        "completion_time": "03:45",
-        "rank": 1
-    },
-    {
-        "player_name": "Tấn Phước",
-        "total_score": 1250,
-        "completion_time": "04:12",
-        "rank": 2
-    },
-    {
-        "player_name": "Phước Hưng",
-        "total_score": 980,
-        "completion_time": "05:00",
-        "rank": 3
+        "run_id": "e63bf03907fc4d45988b99fbc05a86ae",
+        "player_name": "Đạt",
+        "category": "All",
+        "total_score": 30,
+        "total_questions": 5,
+        "correct_count": 1,
+        "accuracy_percentage": 20.0,
+        "elapsed_seconds": 33.828,
+        "played_at": "2026-10-19T11:40:39.580310+00:00"
     }
 ]

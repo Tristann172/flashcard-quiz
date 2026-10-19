@@ -456,6 +456,11 @@ class ReviewDeck:
 
 class Tab2DataAdapter:
 
+    RESULT_FIELDS = (
+        "run_id", "player_name", "category", "total_score", "total_questions",
+        "correct_count", "accuracy_percentage", "elapsed_seconds", "played_at",
+    )
+
     def load_deck(self) -> ReviewDeck:
         rows, _ = storage.load_cards()
         if not isinstance(rows, list):
@@ -498,15 +503,20 @@ class Tab2DataAdapter:
         return deepcopy(rows)
 
     def save_result(self, record: dict) -> None:
+        if any(field not in record for field in self.RESULT_FIELDS):
+            raise ValueError("Kết quả lượt thi thiếu trường bắt buộc.")
+        payload = {field: deepcopy(record[field]) for field in self.RESULT_FIELDS}
+        if not isinstance(payload["run_id"], str) or not payload["run_id"].strip():
+            raise ValueError("Kết quả lượt thi thiếu mã run_id hợp lệ.")
         rows = self.load_results()
-        existing = next((row for row in rows if row.get("run_id") == record["run_id"]), None)
+        existing = next((row for row in rows if row.get("run_id") == payload["run_id"]), None)
         if existing is not None:
-            if any(existing.get(key) != value for key, value in record.items()):
+            if any(existing.get(key) != value for key, value in payload.items()):
                 raise ValueError("Mã lượt chơi đã tồn tại với kết quả khác.")
             return
-        if not storage.save_leaderboard([*rows, deepcopy(record)]):
+        if not storage.save_leaderboard([*rows, payload]):
             raise OSError("Storage chưa lưu được kết quả. Bạn có thể thử lại.")
-        if not any(row.get("run_id") == record["run_id"] for row in self.load_results()):
+        if not any(row.get("run_id") == payload["run_id"] for row in self.load_results()):
             raise OSError("Chưa xác minh được kết quả đã lưu.")
 
 
@@ -620,10 +630,6 @@ class MinigameView:
         self.source_fingerprint = deck.fingerprint
         self.extras = deepcopy(deck.extras)
         self.player, self.category, self.kind = player.strip(), category, kind
-        config = {"cards": sorted((card.to_dict() for card in self.cards), key=lambda c: c["id"]),
-                  "seconds": SECONDS_PER_QUESTION, "category": category}
-        self.config_id = hashlib.sha256(json.dumps(config, sort_keys=True,
-                                                  ensure_ascii=False).encode("utf-8")).hexdigest()
         if shuffle:
             random.shuffle(self.cards)
         self.shuffle = shuffle
@@ -692,19 +698,18 @@ class MinigameView:
         if self.phase == "question" and not self.expire():
             self.elapsed += min(SECONDS_PER_QUESTION, max(0, self._clock() - self.started))
         self.phase = "result"
-        seconds = math.ceil(self.elapsed)
         summary = self.stats.submit()
-        self.result_record = {**summary, "model_session_id": summary["session_id"],
-                              "session_id": self.run_id, "run_id": self.run_id,
-                              "player_name": self.player, "category": self.category,
-                              "total_questions": len(self.cards),
-                              "answered_count": self.stats.total_questions,
-                              "elapsed_seconds": round(self.elapsed, 6),
-                              "completion_time": f"{seconds // 60:02}:{seconds % 60:02}",
-                              "max_streak": self.max_streak, "config_id": self.config_id,
-                              "kind": self.kind, "seconds_per_question": SECONDS_PER_QUESTION,
-                              "question_ids": [card.id for card in self.cards],
-                              "played_at": datetime.now(timezone.utc).isoformat()}
+        self.result_record = {
+            "run_id": self.run_id,
+            "player_name": self.player,
+            "category": self.category,
+            "total_score": summary["total_score"],
+            "total_questions": len(self.cards),
+            "correct_count": summary["correct_count"],
+            "accuracy_percentage": summary["accuracy_percentage"],
+            "elapsed_seconds": round(self.elapsed, 6),
+            "played_at": datetime.now(timezone.utc).isoformat(),
+        }
 
     def cancel(self) -> None:
         self.phase = "cancelled"
@@ -723,7 +728,7 @@ class MinigameView:
 
     def _save_result(self) -> None:
         """Attempt saving once until the user requests a retry, retaining errors."""
-        if self.save_attempted:
+        if self.kind != "ranked" or self.save_attempted:
             return
         self.save_attempted = True
         try:
@@ -744,7 +749,6 @@ class MinigameView:
         elif self.phase == "feedback":
             self.render_feedback()
         elif self.phase == "result":
-            self._save_result()
             self.render_result()
 
     def render_question(self) -> None:
@@ -814,6 +818,9 @@ class MinigameView:
             st.rerun()
 
     def render_result(self) -> None:
+        if self.kind == "ranked":
+            self._save_result()
+        can_continue = self.kind != "ranked" or self.saved
         st.markdown("### 🏁 Kết quả Minigame" if self.kind == "ranked" else "### 📖 Kết quả luyện tập")
         st.write("Người chơi:", self.player)
         score, correct, streak, duration = st.columns(4)
@@ -826,8 +833,10 @@ class MinigameView:
         wrong = sum(not item["is_correct"] for item in self.history)
         st.caption(f"{wrong - timed_out} câu sai · {timed_out} câu hết giờ · {unanswered} câu chưa trả lời. "
                    "Thời gian không tính lúc đọc phản hồi.")
-        if self.saved:
-            st.success("Đã lưu kết quả." if self.kind == "ranked" else "Đã lưu lượt luyện tập, tách khỏi bảng thi chính.")
+        if self.kind != "ranked":
+            st.caption("Lượt luyện tập không ghi vào bảng xếp hạng.")
+        elif self.saved:
+            st.success("Đã lưu kết quả.")
         else:
             st.error("Chưa lưu được kết quả: " + self.save_error)
             if st.button("Thử lưu lại", key="tab2_retry_save"):
@@ -847,25 +856,25 @@ class MinigameView:
                 labels = {option["id"]: option["text"] for option in card.options}
                 st.write("Đáp án: " + "; ".join(f"{key}. {labels[key]}" for key in card.correct_option_ids))
         if st.button(f"↻ Luyện lại câu sai / hết giờ ({wrong})", key="tab2_retry_wrong",
-                     disabled=wrong == 0 or not self.saved, type="primary", width="stretch"):
+                     disabled=wrong == 0 or not can_continue, type="primary", width="stretch"):
             st.session_state[TAB2_STATE].active = self.retry()
             st.rerun()
         if unanswered and st.button(f"Ôn các câu chưa trả lời ({unanswered})", key="tab2_retry_unanswered",
-                                    disabled=not self.saved, width="stretch"):
+                                    disabled=not can_continue, width="stretch"):
             st.session_state[TAB2_STATE].active = self.retry(unanswered=True)
             st.rerun()
         if not wrong:
             st.caption("Không có câu sai hoặc hết giờ để luyện lại.")
-        if st.button("Về màn hình chờ", key="tab2_result_lobby", disabled=not self.saved):
+        if st.button("Về màn hình chờ", key="tab2_result_lobby", disabled=not can_continue):
             st.session_state[TAB2_STATE].reset()
             st.rerun()
-        if not self.saved:
+        if self.kind == "ranked" and not self.saved:
             discard = st.checkbox("Rời kết quả mà không lưu", key="tab2_discard")
             if discard and st.button("Xác nhận về màn hình chờ", key="tab2_discard_confirm"):
                 st.session_state[TAB2_STATE].reset()
                 st.rerun()
         if self.kind == "ranked":
-            LeaderboardView(self.adapter).render(self.config_id)
+            LeaderboardView(self.adapter).render(self.category)
 
 
 class LeaderboardView:
@@ -878,12 +887,6 @@ class LeaderboardView:
         value = row.get("elapsed_seconds")
         if isinstance(value, (float, int)) and not isinstance(value, bool) and math.isfinite(value) and value >= 0:
             return float(value)
-        try:
-            minutes, seconds = str(row["completion_time"]).split(":")
-            if minutes.isdigit() and seconds.isdigit() and int(seconds) < 60:
-                return int(minutes) * 60 + int(seconds)
-        except (KeyError, ValueError):
-            pass
         return math.inf
 
     @classmethod
@@ -896,35 +899,30 @@ class LeaderboardView:
         st.dataframe([{"Hạng": index, "Người chơi": str(row.get("player_name", "")),
                        "Điểm": row.get("total_score", 0),
                        "Thời gian": (f"{cls.duration(row):.1f}s" if math.isfinite(cls.duration(row)) else "Chưa rõ")}
-                      for index, row in enumerate(cls.ranked(rows), 1)], hide_index=True, width="stretch")
+                      for index, row in enumerate(cls.ranked(rows), 1)], hide_index=True, width="stretch",
+                     column_config={name: st.column_config.Column(alignment="left")
+                                    for name in ("Hạng", "Người chơi", "Điểm", "Thời gian")})
 
-    def render(self, config_id: str | None = None) -> None:
+    def render(self, category: str | None = None) -> None:
         st.markdown("### 🏆 Bảng xếp hạng")
         try:
             rows = self.adapter.load_results()
         except DATA_ERRORS as error:
             st.error(f"Không thể đọc bảng xếp hạng: {error}")
             return
-        competitive = [row for row in rows if row.get("kind") == "ranked" and row.get("config_id")]
-        if config_id is None and competitive:
-            groups = {}
-            for row in sorted(competitive, key=lambda item: str(item.get("played_at", "")), reverse=True):
-                groups.setdefault(row["config_id"], row)
-            def label(key):
-                row = groups[key]
-                category = "Tất cả chủ đề" if row.get("category") == "All" else row.get("category", "")
-                return f"{category} · {row.get('total_questions', 0)} câu · {row.get('played_at', '')[:10]}"
-            config_id = st.selectbox("Bộ câu thi", list(groups), format_func=label, key="tab2_board_group")
-        visible = [row for row in competitive if row["config_id"] == config_id]
+        if category is None and rows:
+            categories = sorted({row["category"] for row in rows})
+            category = st.selectbox(
+                "Chủ đề", [None, *categories],
+                format_func=lambda value: ("Tất cả lượt thi" if value is None else
+                                            "Tổng hợp các chủ đề" if value == "All" else value),
+                key="tab2_board_category")
+        visible = rows if category is None else [row for row in rows if row.get("category") == category]
         if visible:
             self.table(visible)
         else:
-            st.info("Chưa có kết quả thi chính cho bộ câu này.")
-        legacy = [row for row in rows if not row.get("config_id")]
-        if legacy:
-            with st.expander("Lịch sử cũ · chưa có thông tin bộ câu"):
-                st.caption("Các lượt này không được xếp chung với bộ câu thi mới.")
-                self.table(legacy)
+            st.info("Chưa có kết quả thi chính cho chủ đề này." if category is not None else
+                    "Chưa có kết quả thi chính.")
 
 
 @st.fragment(run_every=1)
